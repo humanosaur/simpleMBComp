@@ -176,12 +176,33 @@ void SimpleMBCompAudioProcessor::getStateInformation (juce::MemoryBlock& destDat
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
+    
+//==============================================================================
+//==============================================================================
+    //Saving the state to the memory block provided by the host
+    //Create a memory stream
+    juce::MemoryOutputStream mos(destData, true);
+    apvts.state.writeToStream(mos);
+//==============================================================================
+//==============================================================================
 }
 
 void SimpleMBCompAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+//==============================================================================
+//==============================================================================
+    //First we must check if the tree pulled from memory is valid
+    auto tree = juce::ValueTree::readFromData(data, sizeInBytes);
+    
+    //If so, we can copy it to the plugic state
+    if ( tree.isValid() )
+    {
+        apvts.replaceState(tree);
+    }
+//==============================================================================
+//==============================================================================
 }
 
 //==============================================================================

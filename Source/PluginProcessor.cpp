@@ -166,7 +166,8 @@ bool SimpleMBCompAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* SimpleMBCompAudioProcessor::createEditor()
 {
-    return new SimpleMBCompAudioProcessorEditor (*this);
+    //return new SimpleMBCompAudioProcessorEditor (*this);
+    return new juce::GenericAudioProcessorEditor(*this);
 }
 
 //==============================================================================
@@ -182,6 +183,70 @@ void SimpleMBCompAudioProcessor::setStateInformation (const void* data, int size
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
 }
+
+//==============================================================================
+//==============================================================================
+
+juce::AudioProcessorValueTreeState::ParameterLayout SimpleMBCompAudioProcessor::createParameterLayout()
+{
+    APVTS::ParameterLayout layout;
+    
+    using namespace juce;
+    
+    //Parameter 1 - Threshold
+    //Range: -60dB to +12dB
+    //Step size: 1dB (i.e. we can adjust the threshold in 1dB increments)
+    //Skew: 1 (distributes the range evenly across the slider)
+    
+    layout.add(std::make_unique<AudioParameterFloat>(ParameterID{"Threshold", 1},
+                                                     "Threshold",
+                                                     NormalisableRange<float>(-60, //minimum
+                                                                              12, // maximum
+                                                                              1, //step-size
+                                                                              1), //skew
+                                                     0));
+    
+    //Parameters 2 and 3 - Attack and Release
+    //Minimum attack time: 5ms
+    //Maximum attack time: 500ms
+    //Step-size and skew: 1
+    
+    auto attackReleaseRange = NormalisableRange<float>(5, 500, 1, 1);
+    layout.add(std::make_unique<AudioParameterFloat>(ParameterID{"Attack",1},
+                                                     "Attack",
+                                                     attackReleaseRange,
+                                                     50));
+    layout.add(std::make_unique<AudioParameterFloat>(ParameterID{"Release",1},
+                                                     "Release",
+                                                     attackReleaseRange,
+                                                     250));
+    
+    //Parameter 4 - Ratio
+    //AudioParameterChoice requires a string array of choices
+    //Define the choices
+    auto choices = std::vector<double>{1, 1.5, 2, 3, 4, 5, 6, 7, 8, 10, 15, 20, 50, 100};
+    
+    //Declare the string array
+    juce::StringArray sa;
+    
+    //Concvert choices into string objects
+    for ( auto choice : choices)
+    {
+        sa.add( juce::String(choice,1) );
+    }
+    
+    layout.add(std::make_unique<AudioParameterChoice>(ParameterID{"Ratio", 1},
+                                                      "Ratio",
+                                                      sa,
+                                                      3));
+    
+    return layout;
+};
+
+//==============================================================================
+//==============================================================================
+
+
 
 //==============================================================================
 // This creates new instances of the plugin..

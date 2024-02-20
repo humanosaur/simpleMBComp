@@ -52,6 +52,19 @@ public:
     //==============================================================================
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
+    
+    //==============================================================================
+    //==============================================================================
+    
+    //Here we declare the APVTS
+    //The APVTS synchronizes our parameters with the host and with the GUI
+    //We must provide all the parameters when the APVTS is constructed,
+    //so we use a ParameterLayout to define that
+    using APVTS = juce::AudioProcessorValueTreeState;
+    static APVTS::ParameterLayout createParameterLayout();
+    APVTS apvts {*this, nullptr, "Parameters", createParameterLayout()};
+    //==============================================================================
+    //==============================================================================
 
 private:
     //==============================================================================

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="fJfMJG" name="SimpleMBComp" projectType="audioplug" useAppConfig="0"
-              addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
+              addUsingNamespaceToJuceHeader="0" displaySplashScreen="0" jucerFormatVersion="1"
               companyName="Skwalk">
   <MAINGROUP id="qtcSu1" name="SimpleMBComp">
     <GROUP id="{D6774BA2-3859-754F-AAD0-4D529F94C2FB}" name="Source">

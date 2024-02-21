@@ -93,8 +93,29 @@ void SimpleMBCompAudioProcessor::changeProgramName (int index, const juce::Strin
 //==============================================================================
 void SimpleMBCompAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
+    //==============================================================================
+    //==============================================================================
+    
+    //To prepare the compressor we must pass a process spec to it,
+    //which we must declare and set up
+    juce::dsp::ProcessSpec spec;
+    
+    //The spec needs to know how many samples it'll prcess at a time
+    spec.maximumBlockSize = samplesPerBlock;
+    
+    //It also needs to know the number of channels.
+    //This compressor can handle multiple channels,
+    //so we'll use the number of channels the compressor is configured with.
+    spec.numChannels = getTotalNumOutputChannels();
+    
+    //It also needs to know the sample rate
+    spec.sampleRate = sampleRate;
+    
+    //Finally we pass this spec to the compressor to be prepared
+    compressor.prepare(spec);
+    
+    //==============================================================================
+    //==============================================================================
 }
 
 void SimpleMBCompAudioProcessor::releaseResources()
@@ -144,6 +165,14 @@ void SimpleMBCompAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
+    //==============================================================================
+    //==============================================================================
+    auto block = juce::dsp::AudioBlock<float>(buffer); //create an audio block out of the buffer
+    auto context = juce::dsp::ProcessContextReplacing<float>(block); //create our context from the block
+    compressor.process(context); //process the context with the compressor
+    //==============================================================================
+    //==============================================================================
+    
     // This is the place where you'd normally do the guts of your plugin's
     // audio processing...
     // Make sure to reset the state if your inner loop is processing

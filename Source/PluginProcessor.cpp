@@ -44,6 +44,9 @@ SimpleMBCompAudioProcessor::SimpleMBCompAudioProcessor()
     ratio = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter("Ratio"));
     jassert(ratio != nullptr);
     
+    bypassed = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter("Bypassed"));
+    jassert(bypassed != nullptr);
+    
 }
 
 SimpleMBCompAudioProcessor::~SimpleMBCompAudioProcessor()
@@ -199,6 +202,15 @@ void SimpleMBCompAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     
     auto block = juce::dsp::AudioBlock<float>(buffer); //create an audio block out of the buffer
     auto context = juce::dsp::ProcessContextReplacing<float>(block); //create our context from the block
+    
+    //Next, we want to toggle whether or not the compressor processes the audio
+    //depending on the state of the bypass parameter.
+    //The easiest way to do this is by setting isBypassed,
+    //since there is already an if block in the process() function
+    //that will bypass processing if set to isBypassed is true.
+    
+    context.isBypassed = bypassed->get();
+    
     compressor.process(context); //process the context with the compressor
     //==============================================================================
     //==============================================================================
@@ -306,6 +318,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout SimpleMBCompAudioProcessor::
                                                       "Ratio",
                                                       sa,
                                                       3));
+    
+    layout.add(std::make_unique<AudioParameterBool>(ParameterID{"Bypassed", 1},
+                                                    "Bypassed",
+                                                    false));
     
     return layout;
 };

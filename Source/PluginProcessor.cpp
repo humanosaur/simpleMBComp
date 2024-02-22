@@ -22,6 +22,28 @@ SimpleMBCompAudioProcessor::SimpleMBCompAudioProcessor()
                        )
 #endif
 {
+    //The parameters are stored in our APVTS as RangedAudioParameters.
+    
+    //RangedAudioParameter is the base class that all other parameters are derived from.
+    
+    //So we must cast them to the proper types
+    //in order to assign them to the member variables we created to store them.
+    
+    //Asserting here will help us catch any misspelled names, incorrect variable types,
+    //or other things that would cause this to return a nullptr.
+    
+    attack = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Attack"));
+    jassert(attack != nullptr);
+    
+    release = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Release"));
+    jassert(release != nullptr);
+    
+    threshold = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Threshold"));
+    jassert(threshold != nullptr);
+    
+    ratio = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter("Ratio"));
+    jassert(ratio != nullptr);
+    
 }
 
 SimpleMBCompAudioProcessor::~SimpleMBCompAudioProcessor()
@@ -167,24 +189,19 @@ void SimpleMBCompAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
     //==============================================================================
     //==============================================================================
+    
+    //Before we process anything, we need to configure
+    compressor.setAttack(attack->get());
+    compressor.setRelease(release->get());
+    compressor.setThreshold(threshold->get());
+    compressor.setRatio(ratio->getCurrentChoiceName().getFloatValue()); //we need to extract the float value of the current choice from the array
+    
+    
     auto block = juce::dsp::AudioBlock<float>(buffer); //create an audio block out of the buffer
     auto context = juce::dsp::ProcessContextReplacing<float>(block); //create our context from the block
     compressor.process(context); //process the context with the compressor
     //==============================================================================
     //==============================================================================
-    
-    // This is the place where you'd normally do the guts of your plugin's
-    // audio processing...
-    // Make sure to reset the state if your inner loop is processing
-    // the samples and the outer loop is handling the channels.
-    // Alternatively, you can process the samples with the channels
-    // interleaved by keeping the same state.
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
-    {
-        auto* channelData = buffer.getWritePointer (channel);
-
-        // ..do something to the data...
-    }
 }
 
 //==============================================================================

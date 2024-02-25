@@ -66,6 +66,10 @@ public:
     
     struct CompressorBand
     {
+        //We will want some easily accessible versions of our parameters.
+        //There's an APVTS member function to do this,
+        //but it would be very costly to do this in the process block,
+        //so instead let's store them in member variables
         juce::AudioParameterFloat* attack { nullptr };
         juce::AudioParameterFloat* release { nullptr };
         juce::AudioParameterFloat* threshold { nullptr };
@@ -112,17 +116,9 @@ public:
 private:
     //==============================================================================
     //==============================================================================
+   
     CompressorBand compressor;
     
-    //We will want some easily accessible versions of our parameters.
-    //There's an APVTS member function to do this,
-    //but it would be very costly to do this in the process block,
-    //so instead let's store them in member variables
-    juce::AudioParameterFloat* attack { nullptr };
-    juce::AudioParameterFloat* release { nullptr };
-    juce::AudioParameterFloat* threshold { nullptr };
-    juce::AudioParameterChoice* ratio { nullptr };
-    juce::AudioParameterBool* bypassed { nullptr };
     //==============================================================================
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleMBCompAudioProcessor)

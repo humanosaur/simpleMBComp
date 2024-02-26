@@ -188,6 +188,15 @@ private:
    
     CompressorBand compressor;
     
+    using Filter = juce::dsp::LinkwitzRileyFilter<float>;
+    Filter LP, HP;
+        
+    //Cached audio parameter for the crossover frequency
+    juce::AudioParameterFloat* lowCrossover { nullptr };
+    
+    //Buffers to copy the signal to so that we can process bands separately
+    std::array<juce::AudioBuffer<float>, 2> filterBuffers;
+    
     //==============================================================================
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleMBCompAudioProcessor)

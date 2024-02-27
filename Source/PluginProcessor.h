@@ -190,6 +190,10 @@ private:
     
     using Filter = juce::dsp::LinkwitzRileyFilter<float>;
     Filter LP, HP;
+    
+    Filter AP;
+    
+    juce::AudioBuffer<float> apBuffer;
         
     //Cached audio parameter for the crossover frequency
     juce::AudioParameterFloat* lowCrossover { nullptr };

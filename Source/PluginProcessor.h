@@ -189,17 +189,20 @@ private:
     CompressorBand compressor;
     
     using Filter = juce::dsp::LinkwitzRileyFilter<float>;
-    Filter LP, HP;
+
+    //      Fc0     Fc1
+    Filter  LP1,    AP2,
+            HP1,    LP2,
+                    HP2;
     
-    Filter AP;
     
-    juce::AudioBuffer<float> apBuffer;
         
     //Cached audio parameter for the crossover frequency
-    juce::AudioParameterFloat* lowCrossover { nullptr };
+    juce::AudioParameterFloat* lowMidCrossover { nullptr };
+    juce::AudioParameterFloat* midHighCrossover { nullptr };
     
     //Buffers to copy the signal to so that we can process bands separately
-    std::array<juce::AudioBuffer<float>, 2> filterBuffers;
+    std::array<juce::AudioBuffer<float>, 3> filterBuffers;
     
     //==============================================================================
     //==============================================================================

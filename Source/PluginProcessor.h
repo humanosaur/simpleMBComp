@@ -195,7 +195,8 @@ private:
             HP1,    LP2,
                     HP2;
     
-    
+//    Filter invAP1, invAP2;
+//    juce::AudioBuffer<float> invAPBuffer;
         
     //Cached audio parameter for the crossover frequency
     juce::AudioParameterFloat* lowMidCrossover { nullptr };

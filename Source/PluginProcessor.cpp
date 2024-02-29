@@ -385,16 +385,26 @@ void SimpleMBCompAudioProcessor::setStateInformation (const void* data, int size
 //==============================================================================
 }
 
-//==============================================================================
-//==============================================================================
 
 juce::AudioProcessorValueTreeState::ParameterLayout SimpleMBCompAudioProcessor::createParameterLayout()
 {
+    //==============================================================================
+    //==============================================================================
+
     APVTS::ParameterLayout layout;
     
     using namespace juce;
     using namespace Params;
     const auto& params = GetParams();
+    
+    
+    //==============================================================================
+    //==============================================================================
+    
+    //Compressor Parameters
+    
+    //==============================================================================
+    //==============================================================================
     
     //Parameter 1 - Threshold
     //Range: -60dB to +12dB
@@ -409,22 +419,65 @@ juce::AudioProcessorValueTreeState::ParameterLayout SimpleMBCompAudioProcessor::
                                                                               1), //skew
                                                      0));
     
-    //Parameters 2 and 3 - Attack and Release
+    layout.add(std::make_unique<AudioParameterFloat>(ParameterID{params.at(Names::Threshold_Mid_Band), 1},
+                                                     params.at(Names::Threshold_Mid_Band),
+                                                     NormalisableRange<float>(-60, //minimum
+                                                                              12, // maximum
+                                                                              1, //step-size
+                                                                              1), //skew
+                                                     0));
+
+    layout.add(std::make_unique<AudioParameterFloat>(ParameterID{params.at(Names::Threshold_High_Band), 1},
+                                                     params.at(Names::Threshold_High_Band),
+                                                     NormalisableRange<float>(-60, //minimum
+                                                                              12, // maximum
+                                                                              1, //step-size
+                                                                              1), //skew
+                                                     0));
+    
+    //Attack and Release will have the same range so let's define it first here
     //Minimum attack time: 5ms
     //Maximum attack time: 500ms
     //Step-size and skew: 1
     
     auto attackReleaseRange = NormalisableRange<float>(5, 500, 1, 1);
+    
+    //Parameter 2 - Attack
+    
     layout.add(std::make_unique<AudioParameterFloat>(ParameterID{params.at(Names::Attack_Low_Band),1},
                                                      params.at(Names::Attack_Low_Band),
                                                      attackReleaseRange,
                                                      50));
+
+    layout.add(std::make_unique<AudioParameterFloat>(ParameterID{params.at(Names::Attack_Mid_Band),1},
+                                                     params.at(Names::Attack_Mid_Band),
+                                                     attackReleaseRange,
+                                                     50));
+    
+    layout.add(std::make_unique<AudioParameterFloat>(ParameterID{params.at(Names::Attack_High_Band),1},
+                                                     params.at(Names::Attack_High_Band),
+                                                     attackReleaseRange,
+                                                     50));
+    
+    //Parameter 3 - Release
+    
     layout.add(std::make_unique<AudioParameterFloat>(ParameterID{params.at(Names::Release_Low_Band),1},
                                                      params.at(Names::Release_Low_Band),
                                                      attackReleaseRange,
                                                      250));
     
+    layout.add(std::make_unique<AudioParameterFloat>(ParameterID{params.at(Names::Release_Mid_Band),1},
+                                                     params.at(Names::Release_Mid_Band),
+                                                     attackReleaseRange,
+                                                     250));
+    
+    layout.add(std::make_unique<AudioParameterFloat>(ParameterID{params.at(Names::Release_High_Band),1},
+                                                     params.at(Names::Release_High_Band),
+                                                     attackReleaseRange,
+                                                     250));
+    
     //Parameter 4 - Ratio
+    
     //AudioParameterChoice requires a string array of choices
     //Define the choices
     auto choices = std::vector<double>{1, 1.5, 2, 3, 4, 5, 6, 7, 8, 10, 15, 20, 50, 100};
@@ -443,10 +496,40 @@ juce::AudioProcessorValueTreeState::ParameterLayout SimpleMBCompAudioProcessor::
                                                       sa,
                                                       3));
     
+    layout.add(std::make_unique<AudioParameterChoice>(ParameterID{params.at(Names::Ratio_Mid_Band), 1},
+                                                      params.at(Names::Ratio_Mid_Band),
+                                                      sa,
+                                                      3));
+    
+    layout.add(std::make_unique<AudioParameterChoice>(ParameterID{params.at(Names::Ratio_High_Band), 1},
+                                                      params.at(Names::Ratio_High_Band),
+                                                      sa,
+                                                      3));
+    
+    //Bypass Parameter
+    
+    
     layout.add(std::make_unique<AudioParameterBool>(ParameterID{params.at(Names::Bypassed_Low_Band), 1},
                                                     params.at(Names::Bypassed_Low_Band),
                                                     false));
     
+    layout.add(std::make_unique<AudioParameterBool>(ParameterID{params.at(Names::Bypassed_Mid_Band), 1},
+                                                    params.at(Names::Bypassed_Mid_Band),
+                                                    false));
+    
+    layout.add(std::make_unique<AudioParameterBool>(ParameterID{params.at(Names::Bypassed_High_Band), 1},
+                                                    params.at(Names::Bypassed_High_Band),
+                                                    false));
+    
+    
+    //==============================================================================
+    //==============================================================================
+  
+    //Filter Crossover Pameters
+    
+    //==============================================================================
+    //==============================================================================
+  
     layout.add(std::make_unique<AudioParameterFloat>(ParameterID{params.at(Names::Low_Mid_Crossover_Freq), 1},
                                                      params.at(Names::Low_Mid_Crossover_Freq),
                                                      NormalisableRange<float>(20, 999, 1, 1),
@@ -458,10 +541,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout SimpleMBCompAudioProcessor::
                                                      2000));
     
     return layout;
+    
+    //==============================================================================
+    //==============================================================================
 };
-
-//==============================================================================
-//==============================================================================
 
 
 

@@ -41,6 +41,14 @@ namespace Params
         Bypassed_Low_Band,
         Bypassed_Mid_Band,
         Bypassed_High_Band,
+        
+        Solo_Low_Band,
+        Solo_Mid_Band,
+        Solo_High_Band,
+        
+        Mute_Low_Band,
+        Mute_Mid_Band,
+        Mute_High_Band,
     }; //end enum Names
     
     //Providing a map will allow us to look things up
@@ -70,7 +78,15 @@ namespace Params
             
             {Bypassed_Low_Band, "Bypassed Low Band"},
             {Bypassed_Mid_Band, "Bypassed Mid Band"},
-            {Bypassed_High_Band, "Bypassed High Band"}
+            {Bypassed_High_Band, "Bypassed High Band"},
+            
+            {Solo_Low_Band,  "Solo Low Band"},
+            {Solo_Mid_Band,  "Solo Mid Band"},
+            {Solo_High_Band, "Solo High Band"},
+            
+            {Mute_Low_Band,  "Mute Low Band"},
+            {Mute_Mid_Band,  "Mute Mid Band"},
+            {Mute_High_Band, "Mute High Band"}
         };
         
         return params;
@@ -88,6 +104,8 @@ struct CompressorBand
     juce::AudioParameterFloat* threshold { nullptr };
     juce::AudioParameterChoice* ratio { nullptr };
     juce::AudioParameterBool* bypassed { nullptr };
+    juce::AudioParameterBool* solo { nullptr };
+    juce::AudioParameterBool* mute { nullptr };
     
     void prepare(const juce::dsp::ProcessSpec& spec)
     {

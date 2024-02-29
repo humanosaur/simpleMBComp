@@ -58,14 +58,36 @@ SimpleMBCompAudioProcessor::SimpleMBCompAudioProcessor()
     
     //Then we'll use the helper function for each parameter we need to cast.
     
-    floatHelper(compressor.attack, Names::Attack_Low_Band);
-    floatHelper(compressor.release, Names::Release_Low_Band);
-    floatHelper(compressor.threshold, Names::Threshold_Low_Band);
-    choiceHelper(compressor.ratio, Names::Ratio_Low_Band);
-    boolHelper(compressor.bypassed, Names::Bypassed_Low_Band);
+    //Compressor 1
+    
+    floatHelper(lowBandComp.attack, Names::Attack_Low_Band);
+    floatHelper(lowBandComp.release, Names::Release_Low_Band);
+    floatHelper(lowBandComp.threshold, Names::Threshold_Low_Band);
+    choiceHelper(lowBandComp.ratio, Names::Ratio_Low_Band);
+    boolHelper(lowBandComp.bypassed, Names::Bypassed_Low_Band);
+    
+    //Compressor 2
+    
+    floatHelper(midBandComp.attack, Names::Attack_Mid_Band);
+    floatHelper(midBandComp.release, Names::Release_Mid_Band);
+    floatHelper(midBandComp.threshold, Names::Threshold_Mid_Band);
+    choiceHelper(midBandComp.ratio, Names::Ratio_Mid_Band);
+    boolHelper(midBandComp.bypassed, Names::Bypassed_Mid_Band);
+    
+    //Compressor 3
+    
+    floatHelper(highBandComp.attack, Names::Attack_High_Band);
+    floatHelper(highBandComp.release, Names::Release_High_Band);
+    floatHelper(highBandComp.threshold, Names::Threshold_High_Band);
+    choiceHelper(highBandComp.ratio, Names::Ratio_High_Band);
+    boolHelper(highBandComp.bypassed, Names::Bypassed_High_Band);
+    
+    //Crossover Frequencies
     
     floatHelper(lowMidCrossover, Names::Low_Mid_Crossover_Freq);
     floatHelper(midHighCrossover, Names::Mid_High_Crossover_Freq);
+    
+    //Filters
     
     LP1.setType(juce::dsp::LinkwitzRileyFilterType::lowpass);
     HP1.setType(juce::dsp::LinkwitzRileyFilterType::highpass);
@@ -75,8 +97,6 @@ SimpleMBCompAudioProcessor::SimpleMBCompAudioProcessor()
     LP2.setType(juce::dsp::LinkwitzRileyFilterType::lowpass);
     HP2.setType(juce::dsp::LinkwitzRileyFilterType::highpass);
     
-//    invAP1.setType(juce::dsp::LinkwitzRileyFilterType::allpass);
-//    invAP2.setType(juce::dsp::LinkwitzRileyFilterType::allpass);
 }
 
 SimpleMBCompAudioProcessor::~SimpleMBCompAudioProcessor()
@@ -151,7 +171,7 @@ void SimpleMBCompAudioProcessor::prepareToPlay (double sampleRate, int samplesPe
     //==============================================================================
     //==============================================================================
     
-    //To prepare the compressor we must pass a process spec to it,
+    //To prepare each compressor we must pass a process spec to it,
     //which we must declare and set up
     juce::dsp::ProcessSpec spec;
     
@@ -167,7 +187,8 @@ void SimpleMBCompAudioProcessor::prepareToPlay (double sampleRate, int samplesPe
     spec.sampleRate = sampleRate;
     
     //Finally we pass this spec to the compressor to be prepared
-    compressor.prepare(spec);
+    for( auto& compressor : compressors )
+        compressor.prepare(spec);
     
     LP1.prepare(spec);
     HP1.prepare(spec);
@@ -177,11 +198,6 @@ void SimpleMBCompAudioProcessor::prepareToPlay (double sampleRate, int samplesPe
     LP2.prepare(spec);
     HP2.prepare(spec);
     
-//    invAP1.prepare(spec);
-//    invAP2.prepare(spec);
-//
-//    invAPBuffer.setSize(spec.numChannels, samplesPerBlock);
-//
     //We need to prepare the separate buffers that we are using the separate the audio into bands
     for( auto& buffer : filterBuffers )
     {
@@ -242,8 +258,8 @@ void SimpleMBCompAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     //==============================================================================
     //==============================================================================
     
-//    compressor.updateCompressorSettings();
-//    compressor.process(buffer);
+    for( auto& compressor : compressors )
+        compressor.updateCompressorSettings();
     
     //Copy the buffer to each of the filterBuffers we created for our bands
     for( auto& fb : filterBuffers )
@@ -251,18 +267,15 @@ void SimpleMBCompAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
         fb = buffer;
     }
     
-//    invAPBuffer = buffer;
     
     auto lowMidCutoffFreq = lowMidCrossover->get();
     LP1.setCutoffFrequency(lowMidCutoffFreq);
     HP1.setCutoffFrequency(lowMidCutoffFreq);
-//    invAP1.setCutoffFrequency(lowMidCutoffFreq);
     
     auto midHighCutoffFreq = midHighCrossover->get();
     AP2.setCutoffFrequency(midHighCutoffFreq);
     LP2.setCutoffFrequency(midHighCutoffFreq);
     HP2.setCutoffFrequency(midHighCutoffFreq);
-//    invAP2.setCutoffFrequency(midHighCutoffFreq);
     
     //Blocks and contexts for the filters
     
@@ -274,9 +287,8 @@ void SimpleMBCompAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     auto fb1Ctx = juce::dsp::ProcessContextReplacing<float>(fb1Block);
     auto fb2Ctx = juce::dsp::ProcessContextReplacing<float>(fb2Block);
     
-    //Processing - pay special attention here
-    //This is how the videos showed it,
-    //though curiously in the write-up the copying step is skipped
+    
+    //Processing the filters - pay special attention here
     
     //The first band is made up of LP1 and AP2, so we simply processes context0 through both
     LP1.process(fb0Ctx);
@@ -293,19 +305,17 @@ void SimpleMBCompAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     HP2.process(fb2Ctx);
     
     
-//    auto invAPBlock = juce::dsp::AudioBlock<float>(invAPBuffer);
-//    auto invAPCtx = juce::dsp::ProcessContextReplacing<float>(invAPBlock);
-//    
-//    invAP1.process(invAPCtx);
-//    invAP2.process(invAPCtx);
+    //Process the filtered bands through their respective compressors
+    
+    for( size_t i = 0; i < filterBuffers.size(); ++i )
+    {
+        compressors[i].process(filterBuffers[i]);
+    }
     
     //Sum the separated buffers back into one
     
     auto numSamples = buffer.getNumSamples();
     auto numChannels = buffer.getNumChannels();
-    
-    if( compressor.bypassed->get() )
-        return;
     
     buffer.clear();
     
@@ -322,17 +332,6 @@ void SimpleMBCompAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     addFilterBand(buffer, filterBuffers[0]);
     addFilterBand(buffer, filterBuffers[1]);
     addFilterBand(buffer, filterBuffers[2]);
-    
-//    if( compressor.bypassed->get() )
-//    {
-//        for( auto ch = 0; ch < numChannels; ++ch)
-//        {
-//            juce::FloatVectorOperations::multiply(invAPBuffer.getWritePointer(ch),
-//                                                  -1.f,
-//                                                  numSamples);
-//        }
-//        addFilterBand(buffer, invAPBuffer);
-//    }
     
     //==============================================================================
     //==============================================================================
@@ -485,7 +484,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout SimpleMBCompAudioProcessor::
     //Declare the string array
     juce::StringArray sa;
     
-    //Concvert choices into string objects
+    //Convert choices into string objects
     for ( auto choice : choices)
     {
         sa.add( juce::String(choice,1) );

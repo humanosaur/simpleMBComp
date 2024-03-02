@@ -49,6 +49,9 @@ namespace Params
         Mute_Low_Band,
         Mute_Mid_Band,
         Mute_High_Band,
+        
+        Gain_In,
+        Gain_Out,
     }; //end enum Names
     
     //Providing a map will allow us to look things up
@@ -86,7 +89,10 @@ namespace Params
             
             {Mute_Low_Band,  "Mute Low Band"},
             {Mute_Mid_Band,  "Mute Mid Band"},
-            {Mute_High_Band, "Mute High Band"}
+            {Mute_High_Band, "Mute High Band"},
+            
+            {Gain_In, "Gain In"},
+            {Gain_Out, "Gain Out"}
         };
         
         return params;
@@ -215,13 +221,23 @@ private:
     Filter  LP1,    AP2,
             HP1,    LP2,
                     HP2;
-    
-//    Filter invAP1, invAP2;
-//    juce::AudioBuffer<float> invAPBuffer;
         
-    //Cached audio parameter for the crossover frequency
+    //Cached audio parameters for the crossover frequency
     juce::AudioParameterFloat* lowMidCrossover { nullptr };
     juce::AudioParameterFloat* midHighCrossover { nullptr };
+    
+    //Gain processors and cached gain parameters
+    juce::dsp::Gain<float> inputGain, outputGain;
+    juce::AudioParameterFloat* inputGainParam { nullptr };
+    juce::AudioParameterFloat* outputGainParam { nullptr };
+    
+    template<typename T, typename U>
+    void applyGain(T& buffer, U& gain)
+    {
+        auto block = juce::dsp::AudioBlock<float>(buffer);
+        auto ctx = juce::dsp::ProcessContextReplacing<float>(block);
+        gain.process(ctx);
+    }
     
     //Buffers to copy the signal to so that we can process bands separately
     std::array<juce::AudioBuffer<float>, 3> filterBuffers;

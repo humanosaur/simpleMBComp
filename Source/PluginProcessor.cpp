@@ -93,6 +93,11 @@ SimpleMBCompAudioProcessor::SimpleMBCompAudioProcessor()
     floatHelper(lowMidCrossover, Names::Low_Mid_Crossover_Freq);
     floatHelper(midHighCrossover, Names::Mid_High_Crossover_Freq);
     
+    //Input and output gain
+    
+    floatHelper(inputGainParam, Names::Gain_In);
+    floatHelper(outputGainParam, Names::Gain_Out);
+    
     //Filters
     
     LP1.setType(juce::dsp::LinkwitzRileyFilterType::lowpass);
@@ -196,6 +201,8 @@ void SimpleMBCompAudioProcessor::prepareToPlay (double sampleRate, int samplesPe
     for( auto& compressor : compressors )
         compressor.prepare(spec);
     
+    //Prep the filters
+
     LP1.prepare(spec);
     HP1.prepare(spec);
     
@@ -203,6 +210,14 @@ void SimpleMBCompAudioProcessor::prepareToPlay (double sampleRate, int samplesPe
     
     LP2.prepare(spec);
     HP2.prepare(spec);
+    
+    //Prep the gain params
+    
+    inputGain.prepare(spec);
+    outputGain.prepare(spec);
+    
+    inputGain.setRampDurationSeconds(.05);
+    outputGain.setRampDurationSeconds(.05);
     
     //We need to prepare the separate buffers that we are using the separate the audio into bands
     for( auto& buffer : filterBuffers )
@@ -266,6 +281,11 @@ void SimpleMBCompAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     
     for( auto& compressor : compressors )
         compressor.updateCompressorSettings();
+    
+    inputGain.setGainDecibels(inputGainParam->get());
+    outputGain.setGainDecibels(outputGainParam->get());
+    
+    applyGain(buffer, inputGain);
     
     //Copy the buffer to each of the filterBuffers we created for our bands
     for( auto& fb : filterBuffers )
@@ -366,6 +386,8 @@ void SimpleMBCompAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
             }
         }
     }
+    
+    applyGain(buffer, outputGain);
     
     //==============================================================================
     //==============================================================================
@@ -599,6 +621,21 @@ juce::AudioProcessorValueTreeState::ParameterLayout SimpleMBCompAudioProcessor::
                                                      params.at(Names::Mid_High_Crossover_Freq),
                                                      NormalisableRange<float>(1000, 20000, 1, 1),
                                                      2000));
+    
+    //Input and output gain parameters
+    
+    //We'll define a range from -24 to 24dB with a step size of 0.5dB
+    auto gainRange = juce::NormalisableRange<float>(-24, 24, 0.5, 1);
+    
+    layout.add(std::make_unique<AudioParameterFloat>(ParameterID{params.at(Names::Gain_In),1},
+                                                     params.at(Names::Gain_In),
+                                                     gainRange,
+                                                     0));
+    
+    layout.add(std::make_unique<AudioParameterFloat>(ParameterID{params.at(Names::Gain_Out),1},
+                                                     params.at(Names::Gain_Out),
+                                                     gainRange,
+                                                     0));
     
     return layout;
     

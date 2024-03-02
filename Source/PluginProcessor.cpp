@@ -261,38 +261,12 @@ bool SimpleMBCompAudioProcessor::isBusesLayoutSupported (const BusesLayout& layo
 }
 #endif
 
-void SimpleMBCompAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+//==============================================================================
+//==============================================================================
+void SimpleMBCompAudioProcessor::updateState()
 {
-    juce::ScopedNoDenormals noDenormals;
-    auto totalNumInputChannels  = getTotalNumInputChannels();
-    auto totalNumOutputChannels = getTotalNumOutputChannels();
-
-    // In case we have more outputs than inputs, this code clears any output
-    // channels that didn't contain input data, (because these aren't
-    // guaranteed to be empty - they may contain garbage).
-    // This is here to avoid people getting screaming feedback
-    // when they first compile a plugin, but obviously you don't need to keep
-    // this code if your algorithm always overwrites all the output channels.
-    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
-        buffer.clear (i, 0, buffer.getNumSamples());
-
-    //==============================================================================
-    //==============================================================================
-    
     for( auto& compressor : compressors )
         compressor.updateCompressorSettings();
-    
-    inputGain.setGainDecibels(inputGainParam->get());
-    outputGain.setGainDecibels(outputGainParam->get());
-    
-    applyGain(buffer, inputGain);
-    
-    //Copy the buffer to each of the filterBuffers we created for our bands
-    for( auto& fb : filterBuffers )
-    {
-        fb = buffer;
-    }
-    
     
     auto lowMidCutoffFreq = lowMidCrossover->get();
     LP1.setCutoffFrequency(lowMidCutoffFreq);
@@ -303,7 +277,19 @@ void SimpleMBCompAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     LP2.setCutoffFrequency(midHighCutoffFreq);
     HP2.setCutoffFrequency(midHighCutoffFreq);
     
-    //Blocks and contexts for the filters
+    inputGain.setGainDecibels(inputGainParam->get());
+    outputGain.setGainDecibels(outputGainParam->get());
+}
+
+void SimpleMBCompAudioProcessor::splitBands(const juce::AudioBuffer<float> &inputBuffer)
+{
+    //Copy the buffer to each of the filterBuffers we created for our bands
+    for( auto& fb : filterBuffers )
+    {
+        fb = inputBuffer;
+    }
+    
+    //Create blocks and contexts for the filters
     
     auto fb0Block = juce::dsp::AudioBlock<float>(filterBuffers[0]);
     auto fb1Block = juce::dsp::AudioBlock<float>(filterBuffers[1]);
@@ -329,21 +315,48 @@ void SimpleMBCompAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     
     //And using our copied buffer we process context2 through the final HP
     HP2.process(fb2Ctx);
+}
+//==============================================================================
+//==============================================================================
+
+void SimpleMBCompAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+{
+    juce::ScopedNoDenormals noDenormals;
+    auto totalNumInputChannels  = getTotalNumInputChannels();
+    auto totalNumOutputChannels = getTotalNumOutputChannels();
+
+    // In case we have more outputs than inputs, this code clears any output
+    // channels that didn't contain input data, (because these aren't
+    // guaranteed to be empty - they may contain garbage).
+    // This is here to avoid people getting screaming feedback
+    // when they first compile a plugin, but obviously you don't need to keep
+    // this code if your algorithm always overwrites all the output channels.
+    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
+        buffer.clear (i, 0, buffer.getNumSamples());
+
+    //==============================================================================
+    //==============================================================================
     
+    updateState();
     
-    //Process the filtered bands through their respective compressors
+    applyGain(buffer, inputGain);
+    
+    splitBands(buffer);
+    
+    //Process the split bands through their respective compressors
     
     for( size_t i = 0; i < filterBuffers.size(); ++i )
     {
         compressors[i].process(filterBuffers[i]);
     }
     
+
+    buffer.clear();
+    
     //Sum the separated buffers back into one
     
     auto numSamples = buffer.getNumSamples();
     auto numChannels = buffer.getNumChannels();
-    
-    buffer.clear();
     
     auto addFilterBand = [nc = numChannels, ns = numSamples](auto& inputBuffer, const auto& source)
     {
@@ -352,6 +365,8 @@ void SimpleMBCompAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
             inputBuffer.addFrom(i, 0, source, i, 0, ns);
         }
     };
+    
+    //Check for soloed bands
     
     auto bandsAreSoloed = false;
     for( auto& compressor : compressors )
@@ -364,6 +379,7 @@ void SimpleMBCompAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     }
     
     //If bands are soloed, add only solo band(s) to the buffer
+    
     if( bandsAreSoloed )
     {
         for( size_t i = 0; i < compressors.size(); ++i )
@@ -462,40 +478,33 @@ juce::AudioProcessorValueTreeState::ParameterLayout SimpleMBCompAudioProcessor::
     //==============================================================================
     
     //Parameter 1 - Threshold
-    //Range: -60dB to +12dB
-    //Step size: 1dB (i.e. we can adjust the threshold in 1dB increments)
-    //Skew: 1 (distributes the range evenly across the slider)
+    
+    auto thresholdRange = NormalisableRange<float>(-60, //minimum
+                                                   12, // maximum
+                                                   1, //step-size
+                                                   1); //skew
     
     layout.add(std::make_unique<AudioParameterFloat>(ParameterID{params.at(Names::Threshold_Low_Band), 1},
                                                      params.at(Names::Threshold_Low_Band),
-                                                     NormalisableRange<float>(-60, //minimum
-                                                                              12, // maximum
-                                                                              1, //step-size
-                                                                              1), //skew
+                                                     thresholdRange,
                                                      0));
     
     layout.add(std::make_unique<AudioParameterFloat>(ParameterID{params.at(Names::Threshold_Mid_Band), 1},
                                                      params.at(Names::Threshold_Mid_Band),
-                                                     NormalisableRange<float>(-60, //minimum
-                                                                              12, // maximum
-                                                                              1, //step-size
-                                                                              1), //skew
+                                                     thresholdRange,
                                                      0));
 
     layout.add(std::make_unique<AudioParameterFloat>(ParameterID{params.at(Names::Threshold_High_Band), 1},
                                                      params.at(Names::Threshold_High_Band),
-                                                     NormalisableRange<float>(-60, //minimum
-                                                                              12, // maximum
-                                                                              1, //step-size
-                                                                              1), //skew
+                                                     thresholdRange,
                                                      0));
     
     //Attack and Release will have the same range so let's define it first here
-    //Minimum attack time: 5ms
-    //Maximum attack time: 500ms
-    //Step-size and skew: 1
     
-    auto attackReleaseRange = NormalisableRange<float>(5, 500, 1, 1);
+    auto attackReleaseRange = NormalisableRange<float>(5, //min
+                                                       500, //max
+                                                       1, //step-size
+                                                       1); //skew
     
     //Parameter 2 - Attack
     

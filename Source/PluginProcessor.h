@@ -242,6 +242,10 @@ private:
     //Buffers to copy the signal to so that we can process bands separately
     std::array<juce::AudioBuffer<float>, 3> filterBuffers;
     
+    void updateState();
+    
+    void splitBands(const juce::AudioBuffer<float>& inputBuffer);
+    
     //==============================================================================
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleMBCompAudioProcessor)

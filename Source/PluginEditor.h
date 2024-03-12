@@ -114,9 +114,34 @@ struct Placeholder : juce::Component
 
 struct GlobalControls : juce::Component
 {
+    GlobalControls(juce::AudioProcessorValueTreeState& apvts);
+    
     void paint(juce::Graphics& g) override;
+    void resized() override;
+    
+private:
+    RotarySlider inGainSlider, lowMidXoverSlider, midHighXoverSlider, outGainSlider;
+    
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> lowMidXoverSliderAttachment, midHighXoverSliderAttachment, inGainSliderAttachment, outGainSliderAttachment;
 };
 
+template <
+    typename Attachment,
+    typename ParamName,
+    typename SliderType,
+    typename Params,
+    typename APVTS
+        >
+void makeAttachment(std::unique_ptr<Attachment>& attachment,
+                    ParamName name,
+                    SliderType& slider,
+                    Params& params,
+                    APVTS& apvts)
+{
+    attachment = std::make_unique<Attachment>(apvts,
+                                              params.at(name),
+                                              slider);
+}
 
 //==============================================================================
 //==============================================================================
@@ -142,7 +167,7 @@ private:
     //==============================================================================
     
     Placeholder controlBar, analyzer, /*globalControls,*/ bandControls;
-    GlobalControls globalControls;
+    GlobalControls globalControls {audioProcessor.apvts};
     
     //==============================================================================
     //==============================================================================

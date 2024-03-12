@@ -254,6 +254,38 @@ Placeholder::Placeholder()
     customColor = juce::Colour(r.nextInt(255),r.nextInt(255),r.nextInt(255));
 }
 
+GlobalControls::GlobalControls(juce::AudioProcessorValueTreeState& apvts)
+{
+    addAndMakeVisible(inGainSlider);
+    addAndMakeVisible(lowMidXoverSlider);
+    addAndMakeVisible(midHighXoverSlider);
+    addAndMakeVisible(outGainSlider);
+    
+    using namespace Params;
+    const auto& params = GetParams();
+    
+    auto makeAttachmentHelper = [&params, &apvts](auto& attachment, const auto&name, auto& slider)
+    {
+        makeAttachment(attachment, name, slider, params, apvts);
+    };
+    
+    makeAttachmentHelper(inGainSliderAttachment,
+                         Names::Gain_In,
+                         inGainSlider);
+    
+    makeAttachmentHelper(lowMidXoverSliderAttachment,
+                         Names::Low_Mid_Crossover_Freq,
+                         lowMidXoverSlider);
+    
+    makeAttachmentHelper(midHighXoverSliderAttachment,
+                         Names::Mid_High_Crossover_Freq,
+                         midHighXoverSlider);
+    
+    makeAttachmentHelper(outGainSliderAttachment,
+                         Names::Gain_Out,
+                         outGainSlider);
+}
+
 void GlobalControls::paint(juce::Graphics& g)
 {
     using namespace juce;
@@ -270,6 +302,24 @@ void GlobalControls::paint(juce::Graphics& g)
     
     g.drawRect(localBounds);
 };
+
+void GlobalControls::resized()
+{
+    auto bounds = getLocalBounds();
+    
+    using namespace juce;
+    
+    FlexBox flexBox;
+    flexBox.flexDirection = FlexBox::Direction::row;
+    flexBox.flexWrap = FlexBox::Wrap::noWrap;
+    
+    flexBox.items.add(FlexItem(inGainSlider).withFlex(1));
+    flexBox.items.add(FlexItem(lowMidXoverSlider).withFlex(1));
+    flexBox.items.add(FlexItem(midHighXoverSlider).withFlex(1));
+    flexBox.items.add(FlexItem(outGainSlider).withFlex(1));
+    
+    flexBox.performLayout(bounds);
+}
 
 //==============================================================================
 //==============================================================================

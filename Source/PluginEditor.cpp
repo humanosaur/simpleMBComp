@@ -297,6 +297,11 @@ GlobalControls::GlobalControls(juce::AudioProcessorValueTreeState& apvts)
         return getParam(pos, apvts, params);
     };
     
+    auto& gainInParam = getParameterHelper(Names::Gain_In);
+    auto& lowMidParam = getParameterHelper(Names::Low_Mid_Crossover_Freq);
+    auto& midHighParam = getParameterHelper(Names::Mid_High_Crossover_Freq);
+    auto& gainOutParam = getParameterHelper(Names::Gain_Out);
+    
     auto makeAttachmentHelper = [&params, &apvts](auto& attachment, const auto&name, auto& slider)
     {
         makeAttachment(attachment, name, slider, params, apvts);
@@ -306,16 +311,16 @@ GlobalControls::GlobalControls(juce::AudioProcessorValueTreeState& apvts)
     
     //Initialize RSWLs
     
-    inGainSlider = std::make_unique<RSWL>( getParameterHelper(Names::Gain_In),
+    inGainSlider = std::make_unique<RSWL>( gainInParam,
                                             "dB");
     
-    lowMidXoverSlider = std::make_unique<RSWL>( getParameterHelper(Names::Low_Mid_Crossover_Freq),
-                                            "Hz");
+    lowMidXoverSlider = std::make_unique<RSWL>( lowMidParam,
+                                               "Hz");
     
-    midHighXoverSlider = std::make_unique<RSWL>( getParameterHelper(Names::Mid_High_Crossover_Freq),
-                                            "Hz");
+    midHighXoverSlider = std::make_unique<RSWL>( midHighParam,
+                                                "Hz");
     
-    outGainSlider = std::make_unique<RSWL>( getParameterHelper(Names::Gain_Out),
+    outGainSlider = std::make_unique<RSWL>( gainOutParam,
                                             "dB");
     
     //Attach RSWLs to parameters
@@ -339,19 +344,19 @@ GlobalControls::GlobalControls(juce::AudioProcessorValueTreeState& apvts)
     //Add max/min label pairs
     
     addLabelPairs(inGainSlider->labels,
-                  getParameterHelper(Names::Gain_In),
+                  gainInParam,
                   "dB");
     
     addLabelPairs(lowMidXoverSlider->labels,
-                  getParameterHelper(Names::Low_Mid_Crossover_Freq),
+                  lowMidParam,
                   "Hz");
     
     addLabelPairs(midHighXoverSlider->labels,
-                  getParameterHelper(Names::Mid_High_Crossover_Freq),
+                  midHighParam,
                   "Hz");
     
     addLabelPairs(outGainSlider->labels,
-                  getParameterHelper(Names::Gain_Out),
+                  gainOutParam,
                   "dB");
     
     

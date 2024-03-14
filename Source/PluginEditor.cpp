@@ -325,7 +325,7 @@ void GlobalControls::paint(juce::Graphics& g)
 
 void GlobalControls::resized()
 {
-    auto bounds = getLocalBounds();
+    auto bounds = getLocalBounds().reduced(5);
     
     using namespace juce;
     
@@ -333,10 +333,19 @@ void GlobalControls::resized()
     flexBox.flexDirection = FlexBox::Direction::row;
     flexBox.flexWrap = FlexBox::Wrap::noWrap;
     
+    auto spacer = FlexItem().withWidth(4);
+    auto endCap = FlexItem().withWidth(6);
+    
+    flexBox.items.add(endCap);
     flexBox.items.add(FlexItem(*inGainSlider).withFlex(1));
+    flexBox.items.add(spacer);
     flexBox.items.add(FlexItem(*lowMidXoverSlider).withFlex(1));
+    flexBox.items.add(spacer);
     flexBox.items.add(FlexItem(*midHighXoverSlider).withFlex(1));
+    flexBox.items.add(spacer);
     flexBox.items.add(FlexItem(*outGainSlider).withFlex(1));
+    flexBox.items.add(spacer);
+    flexBox.items.add(endCap);
     
     flexBox.performLayout(bounds);
 }

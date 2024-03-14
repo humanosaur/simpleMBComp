@@ -178,6 +178,11 @@ void RotarySliderWithLabels::paint(juce::Graphics &g)
     
     auto sliderBounds = getSliderBounds();
     
+    auto bounds = getLocalBounds();
+    
+    g.setColour(Colours::skyblue);
+    g.drawFittedText(getName(), bounds.removeFromTop(getTextHeight() + 2), Justification::centredBottom, 1);
+    
 // these are the bounding boxes around the sliders, leaving in for debugging
 //    g.setColour(Colours::red);
 //    g.drawRect(getLocalBounds());
@@ -229,13 +234,16 @@ void RotarySliderWithLabels::paint(juce::Graphics &g)
 juce::Rectangle<int> RotarySliderWithLabels::getSliderBounds() const
 {
     auto bounds = getLocalBounds();
+    
+    bounds.removeFromTop(getTextHeight()* 1.5);
+    
     auto size = juce::jmin(bounds.getWidth(),bounds.getHeight());
     
-    size -= getTextHeight() * 2;
+    size -= getTextHeight() * 1.5;
     juce::Rectangle<int> r;
     r.setSize(size, size);
     r.setCentre(bounds.getCentreX(), 0);
-    r.setY(2);
+    r.setY(bounds.getY());
     
     return r;
 }
@@ -312,16 +320,20 @@ GlobalControls::GlobalControls(juce::AudioProcessorValueTreeState& apvts)
     //Initialize RSWLs
     
     inGainSlider = std::make_unique<RSWL>( gainInParam,
-                                            "dB");
+                                          "dB",
+                                          "INPUT TRIM");
     
     lowMidXoverSlider = std::make_unique<RSWL>( lowMidParam,
-                                               "Hz");
+                                               "Hz",
+                                               "LOW-MID X-OVER");
     
     midHighXoverSlider = std::make_unique<RSWL>( midHighParam,
-                                                "Hz");
+                                                "Hz",
+                                                "MID-HIGH X-OVER");
     
     outGainSlider = std::make_unique<RSWL>( gainOutParam,
-                                            "dB");
+                                            "dB",
+                                           "OUTPUT TRIM");
     
     //Attach RSWLs to parameters
     

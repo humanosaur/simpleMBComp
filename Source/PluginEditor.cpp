@@ -12,6 +12,35 @@
 //==============================================================================
 //==============================================================================
 
+template<typename T>
+bool truncateKiloValue(T& value)
+{
+    if( value > static_cast<T>(999) )
+    {
+        value /= static_cast<T>(1000);
+        return true;
+    }
+    return false;
+}
+
+juce::String getValString(const juce::RangedAudioParameter& param, bool getLow, juce::String suffix)
+{
+    juce::String str;
+    
+    auto val = (getLow ? param.getNormalisableRange().start : param.getNormalisableRange().end);
+    
+    bool useK = truncateKiloValue(val);
+    
+    str << val;
+    
+    if( useK )
+        str << "k";
+    
+    str << suffix;
+    
+    return str;
+}
+
 void LookAndFeel::drawRotarySlider(juce::Graphics& g,
                                    int x,
                                    int y,
@@ -226,11 +255,12 @@ juce::String RotarySliderWithLabels::getDisplayString() const
         
         //check if over 1000 and if so, add k to kHz
         //don't need to check which value it is since dBs will never go over 1000
-        if( val > 999.f )
-        {
-            val /= 1000.f;
-            addK = true;
-        }
+//        if( val > 999.f )
+//        {
+//            val /= 1000.f;
+//            addK = true;
+//        }
+        addK = truncateKiloValue(val);
         
         str = juce::String(val, (addK ? 2 : 0));
     }
@@ -257,14 +287,24 @@ Placeholder::Placeholder()
 GlobalControls::GlobalControls(juce::AudioProcessorValueTreeState& apvts)
 {
     using namespace Params;
+    using RSWL = RotarySliderWithLabels;
     const auto& params = GetParams();
+    
+    // Define our helper functions
     
     auto getParameterHelper = [&apvts, &params](const auto& pos) -> auto&
     {
         return getParam(pos, apvts, params);
     };
     
-    using RSWL = RotarySliderWithLabels;
+    auto makeAttachmentHelper = [&params, &apvts](auto& attachment, const auto&name, auto& slider)
+    {
+        makeAttachment(attachment, name, slider, params, apvts);
+    };
+    
+    //Use our helper functions
+    
+    //Initialize RSWLs
     
     inGainSlider = std::make_unique<RSWL>( getParameterHelper(Names::Gain_In),
                                             "dB");
@@ -278,10 +318,7 @@ GlobalControls::GlobalControls(juce::AudioProcessorValueTreeState& apvts)
     outGainSlider = std::make_unique<RSWL>( getParameterHelper(Names::Gain_Out),
                                             "dB");
     
-    auto makeAttachmentHelper = [&params, &apvts](auto& attachment, const auto&name, auto& slider)
-    {
-        makeAttachment(attachment, name, slider, params, apvts);
-    };
+    //Attach RSWLs to parameters
     
     makeAttachmentHelper(inGainSliderAttachment,
                          Names::Gain_In,
@@ -299,6 +336,26 @@ GlobalControls::GlobalControls(juce::AudioProcessorValueTreeState& apvts)
                          Names::Gain_Out,
                          *outGainSlider);
     
+    //Add max/min label pairs
+    
+    addLabelPairs(inGainSlider->labels,
+                  getParameterHelper(Names::Gain_In),
+                  "dB");
+    
+    addLabelPairs(lowMidXoverSlider->labels,
+                  getParameterHelper(Names::Low_Mid_Crossover_Freq),
+                  "Hz");
+    
+    addLabelPairs(midHighXoverSlider->labels,
+                  getParameterHelper(Names::Mid_High_Crossover_Freq),
+                  "Hz");
+    
+    addLabelPairs(outGainSlider->labels,
+                  getParameterHelper(Names::Gain_Out),
+                  "dB");
+    
+    
+    //Add and make visible
     
     addAndMakeVisible(*inGainSlider);
     addAndMakeVisible(*lowMidXoverSlider);

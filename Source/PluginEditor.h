@@ -157,6 +157,24 @@ juce::RangedAudioParameter& getParam(const Name& pos, APVTS& apvts, Params& para
     return *param;
 }
 
+juce::String getValString(const juce::RangedAudioParameter& param,
+                          bool getLow,
+                          juce::String suffix);
+
+template<
+    typename Labels,
+    typename ParamType,
+    typename SuffixType
+        >
+void addLabelPairs(Labels& labels, const ParamType& param, const SuffixType& suffix)
+{
+    labels.clear();
+    labels.add({0,
+                getValString(param, true, suffix)});
+    labels.add({1,
+                getValString(param, false, suffix)});
+}
+
 //==============================================================================
 //==============================================================================
 

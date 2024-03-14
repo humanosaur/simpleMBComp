@@ -30,14 +30,14 @@ struct LookAndFeel : juce::LookAndFeel_V4
                            bool shouldDrawButtonAsDown) override;
 };
 
-struct RotarySlider : juce::Slider
-{
-    RotarySlider() :
-    
-    juce::Slider(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag,
-                 juce::Slider::TextEntryBoxPosition::NoTextBox)
-    { };
-};
+//struct RotarySlider : juce::Slider
+//{
+//    RotarySlider() :
+//
+//    juce::Slider(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag,
+//                 juce::Slider::TextEntryBoxPosition::NoTextBox)
+//    { };
+//};
 
 struct RotarySliderWithLabels : juce::Slider
 {
@@ -120,7 +120,9 @@ struct GlobalControls : juce::Component
     void resized() override;
     
 private:
-    RotarySlider inGainSlider, lowMidXoverSlider, midHighXoverSlider, outGainSlider;
+    //RotarySlider inGainSlider, lowMidXoverSlider, midHighXoverSlider, outGainSlider;
+    std::unique_ptr<RotarySliderWithLabels> inGainSlider, lowMidXoverSlider, midHighXoverSlider, outGainSlider;
+    
     
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> lowMidXoverSliderAttachment, midHighXoverSliderAttachment, inGainSliderAttachment, outGainSliderAttachment;
 };
@@ -141,6 +143,18 @@ void makeAttachment(std::unique_ptr<Attachment>& attachment,
     attachment = std::make_unique<Attachment>(apvts,
                                               params.at(name),
                                               slider);
+}
+
+template <
+    typename Name,
+    typename APVTS,
+    typename Params
+         >
+juce::RangedAudioParameter& getParam(const Name& pos, APVTS& apvts, Params& params)
+{
+    auto param = apvts.getParameter(params.at(pos));
+    jassert( param != nullptr );
+    return *param;
 }
 
 //==============================================================================

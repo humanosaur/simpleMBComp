@@ -403,16 +403,6 @@ void GlobalControls::paint(juce::Graphics& g)
     //using namespace juce;
     auto bounds = getLocalBounds();
     
-//    g.setColour(Colours::blueviolet);
-//    g.fillAll();
-//
-//    auto localBounds = bounds;
-//
-//    bounds.reduce(3, 3);
-//    g.setColour(Colours::black);
-//    g.fillRoundedRectangle(bounds.toFloat(), 3);
-//
-//    g.drawRect(localBounds);
     drawModuleBackground(g, bounds);
 };
 
@@ -485,17 +475,6 @@ void CompressorBandControls::paint(juce::Graphics& g)
     //using namespace juce;
     auto bounds = getLocalBounds();
     
-//    g.setColour(Colours::blueviolet);
-//    g.fillAll();
-//
-//    auto localBounds = bounds;
-//
-//    bounds.reduce(3, 3);
-//    g.setColour(Colours::black);
-//    g.fillRoundedRectangle(bounds.toFloat(), 3);
-//
-//    g.drawRect(localBounds);
-    
     drawModuleBackground(g, bounds);
 };
 
@@ -542,6 +521,8 @@ SimpleMBCompAudioProcessorEditor::SimpleMBCompAudioProcessorEditor (SimpleMBComp
     addAndMakeVisible(globalControls);
     addAndMakeVisible(bandControls);
     
+    setLookAndFeel(&lnf);
+    
     //==============================================================================
     //==============================================================================
     
@@ -552,6 +533,7 @@ SimpleMBCompAudioProcessorEditor::SimpleMBCompAudioProcessorEditor (SimpleMBComp
 
 SimpleMBCompAudioProcessorEditor::~SimpleMBCompAudioProcessorEditor()
 {
+    setLookAndFeel(nullptr);
 }
 
 //==============================================================================

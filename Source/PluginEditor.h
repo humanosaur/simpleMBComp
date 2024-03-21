@@ -47,7 +47,7 @@ struct RotarySliderWithLabels : juce::Slider
     suffix(unitSuffix)
     {
         setName(title);
-        setLookAndFeel(&lnf);
+       // setLookAndFeel(&lnf);
     }
     
     ~RotarySliderWithLabels()
@@ -71,7 +71,7 @@ struct RotarySliderWithLabels : juce::Slider
     juce::String getDisplayString() const;
     
 private:
-    LookAndFeel lnf;
+   // LookAndFeel lnf;
     
     juce::RangedAudioParameter* param;
     juce::String suffix;
@@ -212,6 +212,8 @@ private:
     
     //==============================================================================
     //==============================================================================
+    
+    LookAndFeel lnf;
     
     Placeholder controlBar, analyzer /*, globalControls, bandControls*/;
     GlobalControls globalControls {audioProcessor.apvts};

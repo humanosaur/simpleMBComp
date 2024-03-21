@@ -439,11 +439,29 @@ void GlobalControls::resized()
     flexBox.performLayout(bounds);
 }
 
-CompressorBandControls::CompressorBandControls(juce::AudioProcessorValueTreeState& apvts)
+CompressorBandControls::CompressorBandControls(juce::AudioProcessorValueTreeState& apvts) :
+apvts(apvts),
+attackSlider(nullptr, "ms", "ATTACK"),
+releaseSlider(nullptr, "ms", "RELEASE"),
+thresholdSlider(nullptr, "dB", "THRESHOLD"),
+ratioSlider(nullptr, "", "RATIO")
 {
     using namespace Params;
     //using RSWL = RotarySliderWithLabels;
     const auto& params = GetParams();
+    
+    //Parameters
+    
+    auto getParameterHelper = [&apvts, &params](const auto& pos) -> auto&
+    {
+        return getParam(pos, apvts, params);
+    };
+    
+    attackSlider.changeParam(&getParameterHelper(Names::Attack_Mid_Band));
+    releaseSlider.changeParam(&getParameterHelper(Names::Release_Mid_Band));
+    thresholdSlider.changeParam(&getParameterHelper(Names::Threshold_Mid_Band));
+    ratioSlider.changeParam(&getParameterHelper(Names::Ratio_Mid_Band));
+    
     
     //Attachments
     
@@ -467,6 +485,18 @@ CompressorBandControls::CompressorBandControls(juce::AudioProcessorValueTreeStat
     makeAttachmentHelper(ratioSliderAttachment,
                          Names::Ratio_Mid_Band,
                          ratioSlider);
+    
+    //Add max/min label pairs
+    
+    addLabelPairs(attackSlider.labels, getParameterHelper(Names::Attack_Mid_Band), "ms");
+    addLabelPairs(releaseSlider.labels, getParameterHelper(Names::Release_Mid_Band), "ms");
+    addLabelPairs(thresholdSlider.labels, getParameterHelper(Names::Threshold_Mid_Band), "dB");
+
+    //The ratio slider needs a little extra help
+    ratioSlider.labels.add({0, "1:1"});
+    auto ratioParam = dynamic_cast<juce::AudioParameterChoice*>(&getParameterHelper(Names::Ratio_Mid_Band));
+    ratioSlider.labels.add({1, juce::String(ratioParam->choices.getReference(ratioParam->choices.size() - 1).getIntValue()) + ":1"});
+    
     
     //Add and make visible
     

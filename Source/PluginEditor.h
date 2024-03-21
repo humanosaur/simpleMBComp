@@ -138,8 +138,10 @@ struct CompressorBandControls : juce::Component
     
     void paint(juce::Graphics& g) override;
     
+    juce::AudioProcessorValueTreeState& apvts;
+    
 private:
-    RotarySlider attackSlider, releaseSlider, thresholdSlider, ratioSlider;
+    RotarySliderWithLabels attackSlider, releaseSlider, thresholdSlider, ratioSlider;
     
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attackSliderAttachment, releaseSliderAttachment, thresholdSliderAttachment, ratioSliderAttachment;
 };

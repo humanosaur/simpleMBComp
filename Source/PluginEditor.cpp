@@ -281,11 +281,7 @@ juce::String RotarySliderWithLabels::getDisplayString() const
         
         //check if over 1000 and if so, add k to kHz
         //don't need to check which value it is since dBs will never go over 1000
-//        if( val > 999.f )
-//        {
-//            val /= 1000.f;
-//            addK = true;
-//        }
+
         addK = truncateKiloValue(val);
         
         str = juce::String(val, (addK ? 2 : 0));
@@ -444,7 +440,7 @@ apvts(apvts),
 attackSlider(nullptr, "ms", "ATTACK"),
 releaseSlider(nullptr, "ms", "RELEASE"),
 thresholdSlider(nullptr, "dB", "THRESHOLD"),
-ratioSlider(nullptr, "", "RATIO")
+ratioSlider(nullptr, "")
 {
     using namespace Params;
     //using RSWL = RotarySliderWithLabels;
@@ -539,6 +535,21 @@ void CompressorBandControls::resized()
     flexBox.items.add(endCap);
     
     flexBox.performLayout(bounds);
+}
+
+juce::String RatioSlider::getDisplayString() const
+{
+    auto* choiceParam = dynamic_cast<juce::AudioParameterChoice*>(param);
+    jassert(choiceParam != nullptr);
+    
+    auto currentChoice = choiceParam->getCurrentChoiceName();
+    
+    if (currentChoice.contains(".0"))
+        currentChoice = currentChoice.substring(0, currentChoice.indexOf("."));
+    
+    currentChoice << ":1";
+    
+    return currentChoice;
 }
 
 //==============================================================================

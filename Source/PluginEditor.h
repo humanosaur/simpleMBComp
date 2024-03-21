@@ -41,19 +41,19 @@ struct RotarySlider : juce::Slider
 
 struct RotarySliderWithLabels : juce::Slider
 {
-    RotarySliderWithLabels(juce::RangedAudioParameter& rap, const juce::String& unitSuffix, const juce::String& title) : juce::Slider(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag,
+    RotarySliderWithLabels(juce::RangedAudioParameter* rap, const juce::String& unitSuffix, const juce::String& title) : juce::Slider(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag,
                     juce::Slider::TextEntryBoxPosition::NoTextBox),
-    param(&rap),
+    param(rap),
     suffix(unitSuffix)
     {
         setName(title);
        // setLookAndFeel(&lnf);
     }
     
-    ~RotarySliderWithLabels()
-    {
-        setLookAndFeel(nullptr);
-    }
+//    ~RotarySliderWithLabels()
+//    {
+//        setLookAndFeel(nullptr);
+//    }
     
     //this structure holds string that displays min and max values and the position to display those values
     struct LabelPos
@@ -69,6 +69,8 @@ struct RotarySliderWithLabels : juce::Slider
     juce::Rectangle<int> getSliderBounds() const;
     int getTextHeight() const { return 14; }
     juce::String getDisplayString() const;
+    
+    void changeParam(juce::RangedAudioParameter* p);
     
 private:
    // LookAndFeel lnf;

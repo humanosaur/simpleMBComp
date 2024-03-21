@@ -304,6 +304,12 @@ juce::String RotarySliderWithLabels::getDisplayString() const
     return str;
 }
 
+void RotarySliderWithLabels::changeParam(juce::RangedAudioParameter *p)
+{
+    param = p;
+    repaint();
+}
+
 Placeholder::Placeholder()
 {
     juce::Random r;
@@ -337,19 +343,19 @@ GlobalControls::GlobalControls(juce::AudioProcessorValueTreeState& apvts)
     
     //Initialize RSWLs
     
-    inGainSlider = std::make_unique<RSWL>( gainInParam,
+    inGainSlider = std::make_unique<RSWL>( &gainInParam,
                                           "dB",
                                           "INPUT TRIM");
     
-    lowMidXoverSlider = std::make_unique<RSWL>( lowMidParam,
+    lowMidXoverSlider = std::make_unique<RSWL>( &lowMidParam,
                                                "Hz",
                                                "LOW-MID X-OVER");
     
-    midHighXoverSlider = std::make_unique<RSWL>( midHighParam,
+    midHighXoverSlider = std::make_unique<RSWL>( &midHighParam,
                                                 "Hz",
                                                 "MID-HIGH X-OVER");
     
-    outGainSlider = std::make_unique<RSWL>( gainOutParam,
+    outGainSlider = std::make_unique<RSWL>( &gainOutParam,
                                             "dB",
                                            "OUTPUT TRIM");
     

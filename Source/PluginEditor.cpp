@@ -41,6 +41,23 @@ juce::String getValString(const juce::RangedAudioParameter& param, bool getLow, 
     return str;
 }
 
+void drawModuleBackground(juce::Graphics& g,
+                           juce::Rectangle<int> bounds)
+{
+    using namespace juce;
+    
+    g.setColour(Colours::blueviolet);
+    g.fillAll();
+    
+    auto localBounds = bounds;
+    
+    bounds.reduce(3, 3);
+    g.setColour(Colours::black);
+    g.fillRoundedRectangle(bounds.toFloat(), 3);
+    
+    g.drawRect(localBounds);
+}
+
 void LookAndFeel::drawRotarySlider(juce::Graphics& g,
                                    int x,
                                    int y,
@@ -163,6 +180,7 @@ void LookAndFeel::drawToggleButton(juce::Graphics &g,
         g.strokePath(analyzerButton->randomPath, PathStrokeType(1.f));
     }
 }
+
 
 void RotarySliderWithLabels::paint(juce::Graphics &g)
 {
@@ -382,19 +400,20 @@ GlobalControls::GlobalControls(juce::AudioProcessorValueTreeState& apvts)
 
 void GlobalControls::paint(juce::Graphics& g)
 {
-    using namespace juce;
+    //using namespace juce;
     auto bounds = getLocalBounds();
     
-    g.setColour(Colours::blueviolet);
-    g.fillAll();
-    
-    auto localBounds = bounds;
-    
-    bounds.reduce(3, 3);
-    g.setColour(Colours::black);
-    g.fillRoundedRectangle(bounds.toFloat(), 3);
-    
-    g.drawRect(localBounds);
+//    g.setColour(Colours::blueviolet);
+//    g.fillAll();
+//
+//    auto localBounds = bounds;
+//
+//    bounds.reduce(3, 3);
+//    g.setColour(Colours::black);
+//    g.fillRoundedRectangle(bounds.toFloat(), 3);
+//
+//    g.drawRect(localBounds);
+    drawModuleBackground(g, bounds);
 };
 
 void GlobalControls::resized()
@@ -424,6 +443,89 @@ void GlobalControls::resized()
     flexBox.performLayout(bounds);
 }
 
+CompressorBandControls::CompressorBandControls(juce::AudioProcessorValueTreeState& apvts)
+{
+    using namespace Params;
+    //using RSWL = RotarySliderWithLabels;
+    const auto& params = GetParams();
+    
+    //Attachments
+    
+    auto makeAttachmentHelper = [&params, &apvts](auto& attachment, const auto&name, auto& slider)
+    {
+        makeAttachment(attachment, name, slider, params, apvts);
+    };
+    
+    makeAttachmentHelper(attackSliderAttachment,
+                         Names::Attack_Mid_Band,
+                         attackSlider);
+    
+    makeAttachmentHelper(releaseSliderAttachment,
+                         Names::Release_Mid_Band,
+                         releaseSlider);
+    
+    makeAttachmentHelper(thresholdSliderAttachment,
+                         Names::Threshold_Mid_Band,
+                         thresholdSlider);
+    
+    makeAttachmentHelper(ratioSliderAttachment,
+                         Names::Ratio_Mid_Band,
+                         ratioSlider);
+    
+    //Add and make visible
+    
+    addAndMakeVisible(attackSlider);
+    addAndMakeVisible(releaseSlider);
+    addAndMakeVisible(thresholdSlider);
+    addAndMakeVisible(ratioSlider);
+}
+
+void CompressorBandControls::paint(juce::Graphics& g)
+{
+    //using namespace juce;
+    auto bounds = getLocalBounds();
+    
+//    g.setColour(Colours::blueviolet);
+//    g.fillAll();
+//
+//    auto localBounds = bounds;
+//
+//    bounds.reduce(3, 3);
+//    g.setColour(Colours::black);
+//    g.fillRoundedRectangle(bounds.toFloat(), 3);
+//
+//    g.drawRect(localBounds);
+    
+    drawModuleBackground(g, bounds);
+};
+
+void CompressorBandControls::resized()
+{
+    auto bounds = getLocalBounds().reduced(5);
+    
+    using namespace juce;
+    
+    FlexBox flexBox;
+    flexBox.flexDirection = FlexBox::Direction::row;
+    flexBox.flexWrap = FlexBox::Wrap::noWrap;
+    
+    auto spacer = FlexItem().withWidth(4);
+    auto endCap = FlexItem().withWidth(6);
+    
+    flexBox.items.add(endCap);
+    flexBox.items.add(FlexItem(attackSlider).withFlex(1));
+    flexBox.items.add(spacer);
+    flexBox.items.add(FlexItem(releaseSlider).withFlex(1));
+    flexBox.items.add(spacer);
+    flexBox.items.add(FlexItem(thresholdSlider).withFlex(1));
+    flexBox.items.add(spacer);
+    flexBox.items.add(FlexItem(ratioSlider).withFlex(1));
+    flexBox.items.add(spacer);
+    flexBox.items.add(endCap);
+    
+    flexBox.performLayout(bounds);
+}
+
 //==============================================================================
 //==============================================================================
 
@@ -438,7 +540,7 @@ SimpleMBCompAudioProcessorEditor::SimpleMBCompAudioProcessorEditor (SimpleMBComp
     //addAndMakeVisible(controlBar);
     //addAndMakeVisible(analyzer);
     addAndMakeVisible(globalControls);
-    //addAndMakeVisible(bandControls);
+    addAndMakeVisible(bandControls);
     
     //==============================================================================
     //==============================================================================

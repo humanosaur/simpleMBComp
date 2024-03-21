@@ -30,14 +30,14 @@ struct LookAndFeel : juce::LookAndFeel_V4
                            bool shouldDrawButtonAsDown) override;
 };
 
-//struct RotarySlider : juce::Slider
-//{
-//    RotarySlider() :
-//
-//    juce::Slider(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag,
-//                 juce::Slider::TextEntryBoxPosition::NoTextBox)
-//    { };
-//};
+struct RotarySlider : juce::Slider
+{
+    RotarySlider() :
+
+    juce::Slider(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag,
+                 juce::Slider::TextEntryBoxPosition::NoTextBox)
+    { };
+};
 
 struct RotarySliderWithLabels : juce::Slider
 {
@@ -128,6 +128,20 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> lowMidXoverSliderAttachment, midHighXoverSliderAttachment, inGainSliderAttachment, outGainSliderAttachment;
 };
 
+struct CompressorBandControls : juce::Component
+{
+    CompressorBandControls(juce::AudioProcessorValueTreeState& apvts);
+    
+    void resized() override;
+    
+    void paint(juce::Graphics& g) override;
+    
+private:
+    RotarySlider attackSlider, releaseSlider, thresholdSlider, ratioSlider;
+    
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attackSliderAttachment, releaseSliderAttachment, thresholdSliderAttachment, ratioSliderAttachment;
+};
+
 template <
     typename Attachment,
     typename ParamName,
@@ -199,8 +213,9 @@ private:
     //==============================================================================
     //==============================================================================
     
-    Placeholder controlBar, analyzer, /*globalControls,*/ bandControls;
+    Placeholder controlBar, analyzer /*, globalControls, bandControls*/;
     GlobalControls globalControls {audioProcessor.apvts};
+    CompressorBandControls bandControls {audioProcessor.apvts};
     
     //==============================================================================
     //==============================================================================

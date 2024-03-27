@@ -179,6 +179,22 @@ void LookAndFeel::drawToggleButton(juce::Graphics &g,
         
         g.strokePath(analyzerButton->randomPath, PathStrokeType(1.f));
     }
+    else
+    {
+        auto bounds = toggleButton.getLocalBounds().reduced(2);
+        
+        auto buttonIsOn = toggleButton.getToggleState();
+        
+        const int cornerSize = 4;
+        
+        g.setColour(buttonIsOn ? juce::Colours::white : juce::Colours::black);
+        g.fillRoundedRectangle(bounds.toFloat(), cornerSize); //background
+        
+        g.setColour(buttonIsOn ? juce::Colours::black : juce::Colours::white);
+        g.drawRoundedRectangle(bounds.toFloat(), cornerSize, 1); //border
+        g.drawFittedText(toggleButton.getName(), bounds, juce::Justification::centred, 1); //text
+        
+    }
 }
 
 
@@ -482,6 +498,18 @@ ratioSlider(nullptr, "")
                          Names::Ratio_Mid_Band,
                          ratioSlider);
     
+    makeAttachmentHelper(bypassButtonAttachment,
+                         Names::Bypassed_Mid_Band,
+                         bypassButton);
+    
+    makeAttachmentHelper(soloButtonAttachment,
+                         Names::Solo_Mid_Band,
+                         soloButton);
+    
+    makeAttachmentHelper(muteButtonAttachment,
+                         Names::Mute_Mid_Band,
+                         muteButton);
+    
     //Add max/min label pairs
     
     addLabelPairs(attackSlider.labels, getParameterHelper(Names::Attack_Mid_Band), "ms");
@@ -500,6 +528,14 @@ ratioSlider(nullptr, "")
     addAndMakeVisible(releaseSlider);
     addAndMakeVisible(thresholdSlider);
     addAndMakeVisible(ratioSlider);
+    
+    bypassButton.setName("X");
+    soloButton.setName("S");
+    muteButton.setName("M");
+    
+    addAndMakeVisible(bypassButton);
+    addAndMakeVisible(soloButton);
+    addAndMakeVisible(muteButton);
 }
 
 void CompressorBandControls::paint(juce::Graphics& g)
@@ -515,6 +551,27 @@ void CompressorBandControls::resized()
     auto bounds = getLocalBounds().reduced(5);
     
     using namespace juce;
+    
+    auto createBandControlBox = [](std::vector<Component*> comps)
+    {
+        FlexBox flexBox;
+        flexBox.flexDirection = FlexBox::Direction::column;
+        flexBox.flexWrap = FlexBox::Wrap::noWrap;
+        
+        auto spacer = FlexItem().withHeight(2);
+        
+        for( auto* comp : comps)
+        {
+            flexBox.items.add(spacer);
+            flexBox.items.add(FlexItem(*comp).withFlex(1));
+        }
+        
+        flexBox.items.add(spacer);
+        
+        return flexBox;
+    };
+    
+    auto bandButtonControlBox = createBandControlBox({&bypassButton, &soloButton, &muteButton});
     
     FlexBox flexBox;
     flexBox.flexDirection = FlexBox::Direction::row;
@@ -532,7 +589,9 @@ void CompressorBandControls::resized()
     flexBox.items.add(spacer);
     flexBox.items.add(FlexItem(ratioSlider).withFlex(1));
     flexBox.items.add(spacer);
-    flexBox.items.add(endCap);
+    //flexBox.items.add(endCap);
+    
+    flexBox.items.add(FlexItem(bandButtonControlBox).withWidth(30));
     
     flexBox.performLayout(bounds);
 }

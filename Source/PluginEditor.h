@@ -149,6 +149,10 @@ private:
     RatioSlider ratioSlider;
     
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attackSliderAttachment, releaseSliderAttachment, thresholdSliderAttachment, ratioSliderAttachment;
+    
+    juce::ToggleButton bypassButton, soloButton, muteButton;
+    
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> bypassButtonAttachment, soloButtonAttachment, muteButtonAttachment;
 };
 
 

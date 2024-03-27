@@ -458,68 +458,68 @@ releaseSlider(nullptr, "ms", "RELEASE"),
 thresholdSlider(nullptr, "dB", "THRESHOLD"),
 ratioSlider(nullptr, "")
 {
-    using namespace Params;
-    //using RSWL = RotarySliderWithLabels;
-    const auto& params = GetParams();
-    
-    //Parameters
-    
-    auto getParameterHelper = [&apvts, &params](const auto& pos) -> auto&
-    {
-        return getParam(pos, apvts, params);
-    };
-    
-    attackSlider.changeParam(&getParameterHelper(Names::Attack_Mid_Band));
-    releaseSlider.changeParam(&getParameterHelper(Names::Release_Mid_Band));
-    thresholdSlider.changeParam(&getParameterHelper(Names::Threshold_Mid_Band));
-    ratioSlider.changeParam(&getParameterHelper(Names::Ratio_Mid_Band));
+//    using namespace Params;
+//    //using RSWL = RotarySliderWithLabels;
+//    const auto& params = GetParams();
+//
+//    //Parameters
+//
+//    auto getParameterHelper = [&apvts, &params](const auto& pos) -> auto&
+//    {
+//        return getParam(pos, apvts, params);
+//    };
+//
+//    attackSlider.changeParam(&getParameterHelper(Names::Attack_Mid_Band));
+//    releaseSlider.changeParam(&getParameterHelper(Names::Release_Mid_Band));
+//    thresholdSlider.changeParam(&getParameterHelper(Names::Threshold_Mid_Band));
+//    ratioSlider.changeParam(&getParameterHelper(Names::Ratio_Mid_Band));
     
     
     //Attachments
     
-    auto makeAttachmentHelper = [&params, &apvts](auto& attachment, const auto&name, auto& slider)
-    {
-        makeAttachment(attachment, name, slider, params, apvts);
-    };
+//    auto makeAttachmentHelper = [&params, &apvts](auto& attachment, const auto&name, auto& slider)
+//    {
+//        makeAttachment(attachment, name, slider, params, apvts);
+//    };
     
-    makeAttachmentHelper(attackSliderAttachment,
-                         Names::Attack_Mid_Band,
-                         attackSlider);
+//    makeAttachmentHelper(attackSliderAttachment,
+//                         Names::Attack_Mid_Band,
+//                         attackSlider);
+//
+//    makeAttachmentHelper(releaseSliderAttachment,
+//                         Names::Release_Mid_Band,
+//                         releaseSlider);
+//
+//    makeAttachmentHelper(thresholdSliderAttachment,
+//                         Names::Threshold_Mid_Band,
+//                         thresholdSlider);
+//
+//    makeAttachmentHelper(ratioSliderAttachment,
+//                         Names::Ratio_Mid_Band,
+//                         ratioSlider);
     
-    makeAttachmentHelper(releaseSliderAttachment,
-                         Names::Release_Mid_Band,
-                         releaseSlider);
-    
-    makeAttachmentHelper(thresholdSliderAttachment,
-                         Names::Threshold_Mid_Band,
-                         thresholdSlider);
-    
-    makeAttachmentHelper(ratioSliderAttachment,
-                         Names::Ratio_Mid_Band,
-                         ratioSlider);
-    
-    makeAttachmentHelper(bypassButtonAttachment,
-                         Names::Bypassed_Mid_Band,
-                         bypassButton);
-    
-    makeAttachmentHelper(soloButtonAttachment,
-                         Names::Solo_Mid_Band,
-                         soloButton);
-    
-    makeAttachmentHelper(muteButtonAttachment,
-                         Names::Mute_Mid_Band,
-                         muteButton);
+//    makeAttachmentHelper(bypassButtonAttachment,
+//                         Names::Bypassed_Mid_Band,
+//                         bypassButton);
+//
+//    makeAttachmentHelper(soloButtonAttachment,
+//                         Names::Solo_Mid_Band,
+//                         soloButton);
+//
+//    makeAttachmentHelper(muteButtonAttachment,
+//                         Names::Mute_Mid_Band,
+//                         muteButton);
     
     //Add max/min label pairs
     
-    addLabelPairs(attackSlider.labels, getParameterHelper(Names::Attack_Mid_Band), "ms");
-    addLabelPairs(releaseSlider.labels, getParameterHelper(Names::Release_Mid_Band), "ms");
-    addLabelPairs(thresholdSlider.labels, getParameterHelper(Names::Threshold_Mid_Band), "dB");
+//    addLabelPairs(attackSlider.labels, getParameterHelper(Names::Attack_Mid_Band), "ms");
+//    addLabelPairs(releaseSlider.labels, getParameterHelper(Names::Release_Mid_Band), "ms");
+//    addLabelPairs(thresholdSlider.labels, getParameterHelper(Names::Threshold_Mid_Band), "dB");
 
     //The ratio slider needs a little extra help
-    ratioSlider.labels.add({0, "1:1"});
-    auto ratioParam = dynamic_cast<juce::AudioParameterChoice*>(&getParameterHelper(Names::Ratio_Mid_Band));
-    ratioSlider.labels.add({1, juce::String(ratioParam->choices.getReference(ratioParam->choices.size() - 1).getIntValue()) + ":1"});
+//    ratioSlider.labels.add({0, "1:1"});
+//    auto ratioParam = dynamic_cast<juce::AudioParameterChoice*>(&getParameterHelper(Names::Ratio_Mid_Band));
+//    ratioSlider.labels.add({1, juce::String(ratioParam->choices.getReference(ratioParam->choices.size() - 1).getIntValue()) + ":1"});
     
     
     //Add and make visible
@@ -536,6 +536,34 @@ ratioSlider(nullptr, "")
     addAndMakeVisible(bypassButton);
     addAndMakeVisible(soloButton);
     addAndMakeVisible(muteButton);
+    
+    lowBandButton.setName("Low");
+    midBandButton.setName("Mid");
+    highBandButton.setName("High");
+    
+    lowBandButton.setRadioGroupId(1);
+    midBandButton.setRadioGroupId(1);
+    highBandButton.setRadioGroupId(1);
+    
+    auto buttonSwitcher = [safePtr = this->safePtr]()
+    {
+      if (auto* c = safePtr.getComponent())
+      {
+          c->updateAttachments();
+      }
+    };
+    
+    lowBandButton.onClick = buttonSwitcher;
+    midBandButton.onClick = buttonSwitcher;
+    highBandButton.onClick = buttonSwitcher;
+    
+    lowBandButton.setToggleState(true, juce::NotificationType::dontSendNotification);
+    
+    updateAttachments();
+    
+    addAndMakeVisible(lowBandButton);
+    addAndMakeVisible(midBandButton);
+    addAndMakeVisible(highBandButton);
 }
 
 void CompressorBandControls::paint(juce::Graphics& g)
@@ -545,6 +573,133 @@ void CompressorBandControls::paint(juce::Graphics& g)
     
     drawModuleBackground(g, bounds);
 };
+
+void CompressorBandControls::updateAttachments()
+{
+    enum BandType
+    {
+        Low,
+        Mid,
+        High
+    };
+    
+    BandType bandType = [this]()
+    {
+        if( lowBandButton.getToggleState() )
+            return  BandType::Low;
+        
+        if( midBandButton.getToggleState() )
+            return  BandType::Mid;
+        
+        return  BandType::High;
+    }();
+    
+    using namespace Params;
+    
+    std::vector<Params::Names> names;
+    
+    switch (bandType)
+    {
+        case Low:
+        {
+            names = std::vector<Params::Names>
+            {
+                Names::Attack_Low_Band,
+                Names::Release_Low_Band,
+                Names::Threshold_Low_Band,
+                Names::Ratio_Low_Band,
+                Names::Bypassed_Low_Band,
+                Names::Solo_Low_Band,
+                Names::Mute_Low_Band,
+            };
+            
+            break;
+        }
+        case Mid:
+        {
+            names = std::vector<Params::Names>
+            {
+                Names::Attack_Mid_Band,
+                Names::Release_Mid_Band,
+                Names::Threshold_Mid_Band,
+                Names::Ratio_Mid_Band,
+                Names::Bypassed_Mid_Band,
+                Names::Solo_Mid_Band,
+                Names::Mute_Mid_Band,
+            };
+            
+            break;
+        }
+        case High:
+        {
+            names = std::vector<Params::Names>
+            {
+                Names::Attack_High_Band,
+                Names::Release_High_Band,
+                Names::Threshold_High_Band,
+                Names::Ratio_High_Band,
+                Names::Bypassed_High_Band,
+                Names::Solo_High_Band,
+                Names::Mute_High_Band,
+            };
+            
+            break;
+        }
+    }
+    
+    enum Pos
+    {
+        Attack,
+        Release,
+        Threshold,
+        Ratio,
+        Bypass,
+        Solo,
+        Mute,
+    };
+    
+    const auto& params = GetParams();
+    
+    auto getParameterHelper = [&apvts = this->apvts, &params, &names](const auto& pos) -> auto&
+    {
+        return getParam(names.at(pos), apvts, params);
+    };
+    
+    attackSliderAttachment.reset();
+    releaseSliderAttachment.reset();
+    thresholdSliderAttachment.reset();
+    ratioSliderAttachment.reset();
+    bypassButtonAttachment.reset();
+    soloButtonAttachment.reset();
+    muteButtonAttachment.reset();
+    
+    auto& attackParam = getParameterHelper(Pos::Attack);
+    addLabelPairs(attackSlider.labels, attackParam, "ms");
+    attackSlider.changeParam(&attackParam);
+    
+    auto& releaseParam = getParameterHelper(Pos::Release);
+    addLabelPairs(releaseSlider.labels, releaseParam, "ms");
+    releaseSlider.changeParam(&releaseParam);
+    
+    auto& thresholdParam = getParameterHelper(Pos::Threshold);
+    addLabelPairs(thresholdSlider.labels, thresholdParam, "dB");
+    thresholdSlider.changeParam(&thresholdParam);
+    
+    auto& ratioParamRap = getParameterHelper(Pos::Ratio);
+    ratioSlider.labels.add({0, "1:1"});
+    
+    auto ratioParam = dynamic_cast<juce::AudioParameterChoice*>(&ratioParamRap);
+    ratioSlider.labels.add({1, juce::String(ratioParam->choices.getReference(ratioParam->choices.size() - 1).getIntValue()) + ":1"});
+    ratioSlider.changeParam(&ratioParamRap);
+    
+    makeAttachment(attackSliderAttachment, names[Pos::Attack], attackSlider, params, apvts);
+    makeAttachment(releaseSliderAttachment, names[Pos::Release], releaseSlider, params, apvts);
+    makeAttachment(thresholdSliderAttachment, names[Pos::Threshold], thresholdSlider, params, apvts);
+    makeAttachment(ratioSliderAttachment, names[Pos::Ratio], ratioSlider, params, apvts);
+    makeAttachment(bypassButtonAttachment, names[Pos::Bypass], bypassButton, params, apvts);
+    makeAttachment(soloButtonAttachment, names[Pos::Solo], soloButton, params, apvts);
+    makeAttachment(muteButtonAttachment, names[Pos::Mute], muteButton, params, apvts);
+}
 
 void CompressorBandControls::resized()
 {
@@ -573,14 +728,19 @@ void CompressorBandControls::resized()
     
     auto bandButtonControlBox = createBandControlBox({&bypassButton, &soloButton, &muteButton});
     
+    auto bandSelectControlBox = createBandControlBox({&lowBandButton, &midBandButton, &highBandButton});
+    
     FlexBox flexBox;
     flexBox.flexDirection = FlexBox::Direction::row;
     flexBox.flexWrap = FlexBox::Wrap::noWrap;
     
     auto spacer = FlexItem().withWidth(4);
-    auto endCap = FlexItem().withWidth(6);
+//    auto endCap = FlexItem().withWidth(6);
     
-    flexBox.items.add(endCap);
+    flexBox.items.add(FlexItem(bandSelectControlBox).withWidth(50));
+    
+//    flexBox.items.add(endCap);
+    flexBox.items.add(spacer);
     flexBox.items.add(FlexItem(attackSlider).withFlex(1));
     flexBox.items.add(spacer);
     flexBox.items.add(FlexItem(releaseSlider).withFlex(1));
@@ -589,7 +749,7 @@ void CompressorBandControls::resized()
     flexBox.items.add(spacer);
     flexBox.items.add(FlexItem(ratioSlider).withFlex(1));
     flexBox.items.add(spacer);
-    //flexBox.items.add(endCap);
+//    flexBox.items.add(endCap);
     
     flexBox.items.add(FlexItem(bandButtonControlBox).withWidth(30));
     

@@ -150,9 +150,13 @@ private:
     
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attackSliderAttachment, releaseSliderAttachment, thresholdSliderAttachment, ratioSliderAttachment;
     
-    juce::ToggleButton bypassButton, soloButton, muteButton;
+    juce::ToggleButton bypassButton, soloButton, muteButton, lowBandButton, midBandButton, highBandButton;
     
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> bypassButtonAttachment, soloButtonAttachment, muteButtonAttachment;
+    
+    juce::Component::SafePointer<CompressorBandControls> safePtr { this };
+    
+    void updateAttachments();
 };
 
 

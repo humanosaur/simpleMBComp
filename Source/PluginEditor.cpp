@@ -422,7 +422,7 @@ void GlobalControls::paint(juce::Graphics& g)
     auto bounds = getLocalBounds();
     
     drawModuleBackground(g, bounds);
-};
+}
 
 void GlobalControls::resized()
 {
@@ -483,6 +483,11 @@ ratioSlider(nullptr, "")
     addAndMakeVisible(midBandButton);
     addAndMakeVisible(highBandButton);
     
+    //Listener for our bypass/solo/mute buttons to do all the things we need them to do
+    bypassButton.addListener(this);
+    soloButton.addListener(this);
+    muteButton.addListener(this);
+    
     
     //Now the part where we set which band the controls are assigned to
     auto buttonSwitcher = [safePtr = this->safePtr]()
@@ -507,13 +512,67 @@ ratioSlider(nullptr, "")
     
 }
 
+CompressorBandControls::~CompressorBandControls()
+{
+    bypassButton.removeListener(this);
+    soloButton.removeListener(this);
+    muteButton.removeListener(this);
+}
+
 void CompressorBandControls::paint(juce::Graphics& g)
 {
     //using namespace juce;
     auto bounds = getLocalBounds();
     
     drawModuleBackground(g, bounds);
-};
+}
+
+void CompressorBandControls::buttonClicked(juce::Button *button)
+{
+    updateSliderEnablements();
+    
+    updateSoloMuteBypassToggleStates(*button);
+}
+
+void CompressorBandControls::updateSliderEnablements()
+{
+  //If the band is muted or bypassed, disable the sliders
+    auto disabled = muteButton.getToggleState() || bypassButton.getToggleState();
+    
+    attackSlider.setEnabled(!disabled);
+    releaseSlider.setEnabled(!disabled);
+    ratioSlider.setEnabled(!disabled);
+    thresholdSlider.setEnabled(!disabled);
+}
+
+void CompressorBandControls::updateSoloMuteBypassToggleStates(juce::Button &clickedButton)
+{
+    //Here we basically implement a radio button functionality
+    //with the caveat that it is okay for all buttons to be off.
+    //With regular radio buttons, this would not be possible,
+    //but we need it to be. So the logic is simple:
+    //whichever button is toggled on, toggle the others off,
+    //and if a button is toggled off, do nothing.
+    
+    //We must send the notification since that's how the ParameterAttachment
+    //knows to update the audio parameter
+    
+    if( &clickedButton == &soloButton && soloButton.getToggleState() )
+    {
+        bypassButton.setToggleState(false, juce::NotificationType::sendNotification);
+        muteButton.setToggleState(false, juce::NotificationType::sendNotification);
+    }
+    else if( &clickedButton == &muteButton && muteButton.getToggleState() )
+    {
+        bypassButton.setToggleState(false, juce::NotificationType::sendNotification);
+        soloButton.setToggleState(false, juce::NotificationType::sendNotification);
+    }
+    else if( &clickedButton == &bypassButton && bypassButton.getToggleState() )
+    {
+        muteButton.setToggleState(false, juce::NotificationType::sendNotification);
+        soloButton.setToggleState(false, juce::NotificationType::sendNotification);
+    }
+}
 
 void CompressorBandControls::updateAttachments()
 {

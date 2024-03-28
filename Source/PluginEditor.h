@@ -134,13 +134,17 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> lowMidXoverSliderAttachment, midHighXoverSliderAttachment, inGainSliderAttachment, outGainSliderAttachment;
 };
 
-struct CompressorBandControls : juce::Component
+struct CompressorBandControls : juce::Component, juce::Button::Listener
 {
     CompressorBandControls(juce::AudioProcessorValueTreeState& apvts);
     
     void resized() override;
     
     void paint(juce::Graphics& g) override;
+    
+    void buttonClicked(juce::Button* button) override;
+    
+    ~CompressorBandControls() override;
     
     juce::AudioProcessorValueTreeState& apvts;
     
@@ -156,7 +160,12 @@ private:
     
     juce::Component::SafePointer<CompressorBandControls> safePtr { this };
     
+    void updateSliderEnablements();
+    
+    void updateSoloMuteBypassToggleStates(juce::Button& clickedButton);
+    
     void updateAttachments();
+    
 };
 
 

@@ -192,12 +192,12 @@ private:
 };
 
 
-struct ResponseCurveComponent: juce::Component,
+struct SpectrumAnalyzer: juce::Component,
 juce::AudioProcessorParameter::Listener,
 juce::Timer
 {
-    ResponseCurveComponent(SimpleMBCompAudioProcessor&);
-    ~ResponseCurveComponent();
+    SpectrumAnalyzer(SimpleMBCompAudioProcessor&);
+    ~SpectrumAnalyzer();
     
     void parameterValueChanged (int parameterIndex, float newValue) override;
 
@@ -255,7 +255,7 @@ private:
     LookAndFeel lnf;
     
     Placeholder controlBar /*, analyzer, globalControls, bandControls*/;
-    ResponseCurveComponent analyzer { audioProcessor };
+    SpectrumAnalyzer analyzer { audioProcessor };
     GlobalControls globalControls {audioProcessor.apvts};
     CompressorBandControls bandControls {audioProcessor.apvts};
     

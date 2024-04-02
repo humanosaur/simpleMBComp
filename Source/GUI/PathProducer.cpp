@@ -32,10 +32,22 @@ void PathProducer::process(juce::Rectangle<float> fftBounds, double sampleRate)
         {
             auto size = tempIncomingBuffer.getNumSamples();
             
+            jassert( size <= monoBuffer.getNumSamples() );
+            size = juce::jmin(size, monoBuffer.getNumSamples());
+            
+            
             // First, shift everything in the monoBuffer forward by however many samples are in the tempIncomingBuffer
-            juce::FloatVectorOperations::copy(monoBuffer.getWritePointer(0,0),
-                                              monoBuffer.getReadPointer(0, size),
-                                              monoBuffer.getNumSamples() - size);
+            
+            auto writePointer = monoBuffer.getWritePointer(0, 0);
+            auto readPointer = monoBuffer.getReadPointer(0, size);
+            
+            std::copy(readPointer, //location of first sample in the source we want to copy
+                      readPointer + (monoBuffer.getNumSamples() - size), //location of last sample + 1 that we want to copy
+                      writePointer); //destination buffer
+            
+//            juce::FloatVectorOperations::copy(monoBuffer.getWritePointer(0,0),
+//                                              monoBuffer.getReadPointer(0, size),
+//                                              monoBuffer.getNumSamples() - size);
             
             // Then, copy the samples from the tempIncomingBuffer to the monoBuffer
             juce::FloatVectorOperations::copy(monoBuffer.getWritePointer(0,monoBuffer.getNumSamples() - size),

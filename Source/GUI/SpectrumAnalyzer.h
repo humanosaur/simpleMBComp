@@ -43,7 +43,10 @@ private:
     
     //void drawBackgroundGrid(juce::Graphics& g);
     void drawBackgroundGrid(juce::Graphics& g, juce::Rectangle<int> bounds);
+    
     void drawTextLabels(juce::Graphics& g, juce::Rectangle<int> bounds);
+    
+    void drawFFTAnalysis(juce::Graphics& g, juce::Rectangle<int> bounds);
     
     std::vector<float> getFrequencies();
     std::vector<float> getGains();

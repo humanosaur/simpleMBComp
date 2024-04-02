@@ -11,6 +11,7 @@
 #include <JuceHeader.h>
 #include "DSP/Params.h"
 #include "DSP/CompressorBand.h"
+#include "Utilities.h"
 #include <array>
 
 enum Channel

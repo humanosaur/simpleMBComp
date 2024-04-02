@@ -506,8 +506,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout SimpleMBCompAudioProcessor::
     
     //Parameter 1 - Threshold
     
-    auto thresholdRange = NormalisableRange<float>(-60, //minimum
-                                                   12, // maximum
+    auto thresholdRange = NormalisableRange<float>(MIN_THRESHOLD, //minimum
+                                                   MAX_DECIBELS, // maximum
                                                    1, //step-size
                                                    1); //skew
     

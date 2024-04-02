@@ -33,6 +33,8 @@ SimpleMBCompAudioProcessorEditor::SimpleMBCompAudioProcessorEditor (SimpleMBComp
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
     setSize (600, 500);
+    
+    startTimerHz(60);
 }
 
 SimpleMBCompAudioProcessorEditor::~SimpleMBCompAudioProcessorEditor()
@@ -56,8 +58,6 @@ void SimpleMBCompAudioProcessorEditor::resized()
     // This is generally where you'll want to lay out the positions of any
     // subcomponents in your editor..
     
-    //==============================================================================
-    //==============================================================================
     
     auto bounds = getLocalBounds();
     
@@ -69,7 +69,19 @@ void SimpleMBCompAudioProcessorEditor::resized()
                                             216));
     globalControls.setBounds(bounds);
     
+}
+
+void SimpleMBCompAudioProcessorEditor::timerCallback()
+{
+    std::vector<float> values
+    {
+        audioProcessor.lowBandComp.getRMSInputLevelDb(),
+        audioProcessor.lowBandComp.getRMSOutputLevelDb(),
+        audioProcessor.midBandComp.getRMSInputLevelDb(),
+        audioProcessor.midBandComp.getRMSOutputLevelDb(),
+        audioProcessor.highBandComp.getRMSInputLevelDb(),
+        audioProcessor.highBandComp.getRMSOutputLevelDb()
+    };
     
-    //==============================================================================
-    //==============================================================================
+    analyzer.update(values);
 }

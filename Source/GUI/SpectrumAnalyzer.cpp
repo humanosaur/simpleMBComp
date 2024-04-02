@@ -306,6 +306,33 @@ void SpectrumAnalyzer::drawCrossovers(juce::Graphics &g, juce::Rectangle<int> bo
     g.drawHorizontalLine(mapY(lowThresholdParam->get()), left, lowMidX);
     g.drawHorizontalLine(mapY(midThresholdParam->get()), lowMidX, midHighX);
     g.drawHorizontalLine(mapY(highThresholdParam->get()), midHighX, right);
+    
+    //Map and draw gain reduction
+    
+    auto zeroDb = mapY(0.f);
+    g.setColour(Colours::limegreen.withAlpha(0.3f));
+    
+    g.fillRect(Rectangle<float>::leftTopRightBottom(left, zeroDb, lowMidX, mapY(lowBandGR)));
+    g.fillRect(Rectangle<float>::leftTopRightBottom(lowMidX, zeroDb, midHighX, mapY(midBandGR)));
+    g.fillRect(Rectangle<float>::leftTopRightBottom(midHighX, zeroDb, right, mapY(highBandGR)));
+}
+
+void SpectrumAnalyzer::update(const std::vector<float>& values)
+{
+    jassert( values.size() == 6 );
+    enum
+    {
+        LowBandIn,
+        LowBandOut,
+        MidBandIn,
+        MidBandOut,
+        HighBandIn,
+        HighBandOut
+    };
+    
+    lowBandGR = values[LowBandOut] - values[LowBandIn];
+    midBandGR = values[MidBandOut] - values[MidBandIn];
+    highBandGR = values[HighBandOut] - values[HighBandIn];
 }
 
 void SpectrumAnalyzer::resized()

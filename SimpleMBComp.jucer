@@ -14,6 +14,20 @@
         <FILE id="X24uQ4" name="Params.h" compile="0" resource="0" file="Source/DSP/Params.h"/>
       </GROUP>
       <GROUP id="{55DF4773-B548-7B12-DDAE-45CBDEA0B435}" name="GUI">
+        <GROUP id="{CA996E2B-1337-B876-C4F2-9F5549192377}" name="SpectrumAnalyzer">
+          <FILE id="LRKwcL" name="AnalyzerPathGenerator.h" compile="0" resource="0"
+                file="Source/GUI/AnalyzerPathGenerator.h"/>
+          <FILE id="LO7UVG" name="FFTDataGenerator.h" compile="0" resource="0"
+                file="Source/GUI/FFTDataGenerator.h"/>
+          <FILE id="ZHmEcV" name="FFTOrder.h" compile="0" resource="0" file="Source/GUI/FFTOrder.h"/>
+          <FILE id="N4jaZt" name="PathProducer.cpp" compile="1" resource="0"
+                file="Source/GUI/PathProducer.cpp"/>
+          <FILE id="uDJPTJ" name="PathProducer.h" compile="0" resource="0" file="Source/GUI/PathProducer.h"/>
+          <FILE id="HkZver" name="SpectrumAnalyzer.cpp" compile="1" resource="0"
+                file="Source/GUI/SpectrumAnalyzer.cpp"/>
+          <FILE id="I2m7z9" name="SpectrumAnalyzer.h" compile="0" resource="0"
+                file="Source/GUI/SpectrumAnalyzer.h"/>
+        </GROUP>
         <FILE id="LKoWR7" name="CompressorBandControls.cpp" compile="1" resource="0"
               file="Source/GUI/CompressorBandControls.cpp"/>
         <FILE id="BtIrGo" name="CompressorBandControls.h" compile="0" resource="0"

@@ -61,9 +61,12 @@ void SimpleMBCompAudioProcessorEditor::resized()
     
     auto bounds = getLocalBounds();
     
-    controlBar.setBounds(bounds.removeFromTop(35));
-    bandControls.setBounds(bounds.removeFromBottom(125));
-    analyzer.setBounds(bounds.removeFromTop(215));
+    controlBar.setBounds(bounds.removeFromTop(//35
+                                              32));
+    bandControls.setBounds(bounds.removeFromBottom(//125
+                                                   137));
+    analyzer.setBounds(bounds.removeFromTop(//215
+                                            216));
     globalControls.setBounds(bounds);
     
     

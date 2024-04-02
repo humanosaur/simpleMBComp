@@ -70,5 +70,5 @@ bool truncateKiloValue(T& value)
     return false;
 }
 
-void drawModuleBackground(juce::Graphics& g,
+juce::Rectangle<int> drawModuleBackground(juce::Graphics& g,
                           juce::Rectangle<int> bounds);

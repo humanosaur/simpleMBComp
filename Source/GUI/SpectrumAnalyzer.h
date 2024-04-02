@@ -48,6 +48,15 @@ private:
     
     void drawFFTAnalysis(juce::Graphics& g, juce::Rectangle<int> bounds);
     
+    void drawCrossovers(juce::Graphics& g, juce::Rectangle<int> bounds);
+    
+    juce::AudioParameterFloat* lowMidXoverParam { nullptr };
+    juce::AudioParameterFloat* midHighXoverParam { nullptr };
+    
+    juce::AudioParameterFloat* lowThresholdParam { nullptr };
+    juce::AudioParameterFloat* midThresholdParam { nullptr };
+    juce::AudioParameterFloat* highThresholdParam { nullptr };
+    
     std::vector<float> getFrequencies();
     std::vector<float> getGains();
     std::vector<float> getXs(const std::vector<float>& freqs, float left, float width);

@@ -15,6 +15,7 @@
 #include "GUI/GlobalControls.h"
 #include "GUI/CompressorBandControls.h"
 #include "GUI/SpectrumAnalyzer.h"
+#include "GUI/ControlBar.h"
 
 
 class SimpleMBCompAudioProcessorEditor  : public juce::AudioProcessorEditor, juce::Timer
@@ -38,10 +39,17 @@ private:
     
     LookAndFeel lnf;
     
-    Placeholder controlBar /*, analyzer, globalControls, bandControls*/;
+    //Placeholder controlBar, analyzer, globalControls, bandControls;
+    ControlBar controlBar;
     SpectrumAnalyzer analyzer { audioProcessor };
     GlobalControls globalControls {audioProcessor.apvts};
     CompressorBandControls bandControls {audioProcessor.apvts};
+    
+    void toggleGlobalBypassState();
+    
+    std::array<juce::AudioParameterBool*, 3> getBypassParams();
+    
+    void updateGlobalBypassButton();
     
     //==============================================================================
     //==============================================================================

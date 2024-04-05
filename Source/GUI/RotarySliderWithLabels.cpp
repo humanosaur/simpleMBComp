@@ -10,6 +10,7 @@
 
 #include "RotarySliderWithLabels.h"
 #include "../Utilities.h"
+#include "LookAndFeel.h"
 
 void RotarySliderWithLabels::paint(juce::Graphics &g)
 {
@@ -50,7 +51,7 @@ void RotarySliderWithLabels::paint(juce::Graphics &g)
     auto center = sliderBounds.toFloat().getCentre();
     auto radius = sliderBounds.getWidth() * 0.5f;
     
-    g.setColour(Colour(105u,60u,28u)); //kinda brown
+    g.setColour(ColorScheme::getLabelTextColor());
     g.setFont(getTextHeight());
     
     auto numChoices = labels.size();

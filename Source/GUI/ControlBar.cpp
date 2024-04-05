@@ -23,7 +23,7 @@ void ControlBar::resized()
 {
     auto bounds = getLocalBounds();
     
-    analyzerButton.setBounds(bounds.removeFromLeft(50).withTrimmedTop(4).withTrimmedLeft(4));
+    analyzerButton.setBounds(bounds.removeFromLeft(100).withTrimmedTop(4).withTrimmedBottom(4).withTrimmedLeft(8));
     
     globalBypassButton.setBounds(bounds.removeFromRight(50).withTrimmedTop(4).withTrimmedBottom(4))
     ;}

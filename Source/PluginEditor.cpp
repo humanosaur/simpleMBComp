@@ -42,7 +42,7 @@ SimpleMBCompAudioProcessorEditor::SimpleMBCompAudioProcessorEditor (SimpleMBComp
     
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    setSize (600, 500);
+    setSize (900, 750);
     
     startTimerHz(60);
 }
@@ -56,7 +56,7 @@ SimpleMBCompAudioProcessorEditor::~SimpleMBCompAudioProcessorEditor()
 void SimpleMBCompAudioProcessorEditor::paint (juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
+    g.fillAll (juce::Colours::black);
 
 //    g.setColour (juce::Colours::white);
 //    g.setFont (15.0f);
@@ -72,11 +72,11 @@ void SimpleMBCompAudioProcessorEditor::resized()
     auto bounds = getLocalBounds();
     
     controlBar.setBounds(bounds.removeFromTop(//35
-                                              32));
+                                              42));
     bandControls.setBounds(bounds.removeFromBottom(//125
-                                                   137));
+                                                   201));
     analyzer.setBounds(bounds.removeFromTop(//215
-                                            216));
+                                            300));
     globalControls.setBounds(bounds);
     
 }

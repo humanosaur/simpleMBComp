@@ -29,12 +29,13 @@ void LookAndFeel::drawRotarySlider(juce::Graphics& g,
     auto enabled = slider.isEnabled();
     
     //create and fill a circle
-    g.setColour(enabled ? Colour(327.f, 62.f, 75.f, 0.3f) : Colours::dimgrey);
+    g.setColour(enabled ? ColorScheme::getModuleBorderColor() : Colours::dimgrey);
     g.fillEllipse(bounds);
     
     //draw a border around the circle
-    g.setColour(Colours::black);
-    g.drawEllipse(bounds, 0.5f);
+    //g.setColour(Colours::black);
+    g.setColour(enabled ? ColorScheme::getSliderBorderColor() : Colours::black);
+    g.drawEllipse(bounds, 3.f);
     
     if ( auto* rswl = dynamic_cast<RotarySliderWithLabels*>(&slider))
     {
@@ -49,7 +50,7 @@ void LookAndFeel::drawRotarySlider(juce::Graphics& g,
         r.setTop(bounds.getY());
         r.setBottom(center.getY() - rswl->getTextHeight() * 2);
         
-        g.setColour(Colours::black);
+        g.setColour(ColorScheme::getSliderBorderColor());
         p.addRoundedRectangle(r,2.f);
         
         jassert(rotaryStartAngle < rotaryEndAngle);
@@ -90,10 +91,10 @@ void LookAndFeel::drawToggleButton(juce::Graphics &g,
         
         auto bounds = toggleButton.getLocalBounds();
         
-        g.setColour(Colour(105u,60u,28u));
-        g.fillRect(bounds);
-        g.setColour(Colours::black);
-        g.drawRect(bounds);
+//        g.setColour(ColorScheme::getGlobalBypassButtonFillColor());
+//        g.fillRect(bounds);
+//        g.setColour(Colours::black);
+//        g.drawRect(bounds);
         
         auto size = jmin(bounds.getWidth(),bounds.getHeight()) - 6; //JUCE_LIVE_CONSTANT(6);
         auto r = bounds.withSizeKeepingCentre(size, size).toFloat();
@@ -114,9 +115,9 @@ void LookAndFeel::drawToggleButton(juce::Graphics &g,
         powerButton.startNewSubPath(r.getCentreX(), r.getY());
         powerButton.lineTo(r.getCentre());
         
-        PathStrokeType pst(1.f,PathStrokeType::JointStyle::curved);
+        PathStrokeType pst(1.5,PathStrokeType::JointStyle::curved);
         
-        auto color = toggleButton.getToggleState() ? Colours::dimgrey : Colour(242u, 65u, 163u);
+        auto color = toggleButton.getToggleState() ? Colours::dimgrey : ColorScheme::getGlobalBypassButtonBorderColor();
         
         g.setColour(color);
         g.strokePath(powerButton, pst);
@@ -124,7 +125,7 @@ void LookAndFeel::drawToggleButton(juce::Graphics &g,
     }
     else if( auto* analyzerButton = dynamic_cast<AnalyzerButton*>(&toggleButton))
     {
-        auto color = ! toggleButton.getToggleState() ? Colours::dimgrey : Colour(242u, 65u, 163u);
+        auto color = ! toggleButton.getToggleState() ? Colours::dimgrey : ColorScheme::getGlobalBypassButtonBorderColor();
         
         g.setColour(color);
         
